@@ -81,11 +81,38 @@ $('#nav').addEventListener('click', e => { const b = e.target.closest('button');
 
 /* ------------------------------------------------------------------ modal */
 const modal = $('#modal');
-function openModal(...nodes) { const b = $('#modal-body'); b.replaceChildren(...nodes); modal.hidden = false; }
-function closeModal() { modal.hidden = true; }
+// replaceChildren() stringifies null/undefined/false; drop them first.
+function put(el, ...nodes) { el.replaceChildren(...nodes.filter(n => n !== null && n !== undefined && n !== false)); }
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+let modalReturnFocus = null;
+function openModal(...nodes) {
+  const b = $('#modal-body'); put(b, ...nodes);
+  modalReturnFocus = document.activeElement;
+  const dlg = modal.querySelector('[role=dialog]');
+  const title = b.querySelector('h2');
+  if (title) { title.id = 'modal-title'; dlg.setAttribute('aria-labelledby', 'modal-title'); dlg.removeAttribute('aria-label'); }
+  else { dlg.removeAttribute('aria-labelledby'); dlg.setAttribute('aria-label', 'Passage view'); }
+  modal.hidden = false;
+  $('#modal-close').focus();
+}
+function closeModal() {
+  modal.hidden = true;
+  if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
+  modalReturnFocus = null;
+}
+document.addEventListener('keydown', e => {
+  if (modal.hidden) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+  if (e.key !== 'Tab') return;
+  const items = [...modal.querySelectorAll(FOCUSABLE)].filter(x => x.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (!modal.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+  else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 $('#modal-close').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 /* ------------------------------------------------------------------ helpers */
 const shortLoc = loc => (loc || '').includes(' > ') ? '§ ' + loc.split(' > ').pop() : (loc || '');
@@ -125,7 +152,7 @@ function renderScopeResolution(el, r) {
   const items = r.included.map(d => h('li', {}, `${d.title}${d.kind === 'secondary_notes' ? ' (secondary notes)' : ''} — ${d.reasons.join(' + ')}`));
   const out = r.excluded.map(d => h('li', { class: 'muted' }, `${d.title}: NOT included (${d.why_excluded})`));
   el.className = 'scope-preview notice small ' + (r.included.length ? 'ok' : 'warn');
-  el.replaceChildren(
+  put(el, 
     h('strong', {}, `Resolves to ${r.included.length} document(s)`),
     r.included.length ? h('ul', {}, items) : h('div', {}, 'No eligible documents: nothing can be retrieved with this selection. It will NOT fall back to all documents.'),
     out.length ? h('div', { class: 'small' }, 'Selected but not eligible:', h('ul', {}, out)) : null,
@@ -164,7 +191,7 @@ async function loadStatus() {
     + 'It does not measure tutoring quality or whether the passages support the claims. An API success alone does not count. ' + u.note;
   chip.className = 'chip ' + (s.live_configured ? 'live' : 'demo');
   $('#retrieval-note').textContent = `Retrieval: ${s.retrieval_mode}. ${s.retrieval_note}`;
-  $('#up-tags').replaceChildren(...tagBoxes([], 'uptag'));
+  put($('#up-tags'), ...tagBoxes([], 'uptag'));
 }
 
 /* ------------------------------------------------------------------ library */
@@ -181,8 +208,8 @@ function docMeta(d) {
 function renderDocs() {
   const list = $('#doc-list');
   $('#lib-count').textContent = `(${state.docs.length} documents, ${state.docs.filter(d => d.approved).length} approved)`;
-  if (!state.docs.length) { list.replaceChildren(h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted' }, 'No documents yet. Import a file, or load the synthetic demo documents.'))); return; }
-  list.replaceChildren(...state.docs.map(docCard));
+  if (!state.docs.length) { put(list, h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted' }, 'No documents yet. Import a file, or load the synthetic demo documents.'))); return; }
+  put(list, ...state.docs.map(docCard));
 }
 
 function docCard(d) {
@@ -291,8 +318,8 @@ async function openPassage(id) {
 
 /* ------------------------------------------------------------------ search */
 function renderSearchScope() {
-  $('#search-scope').replaceChildren(scopePicker({}));
-  if (!state.docs.length) loadDocs().then(() => $('#search-scope').replaceChildren(scopePicker({})));
+  put($('#search-scope'), scopePicker({}));
+  if (!state.docs.length) loadDocs().then(() => put($('#search-scope'), scopePicker({})));
 }
 $('#search-form').addEventListener('submit', guard(async e => {
   e.preventDefault();
@@ -303,7 +330,7 @@ $('#search-form').addEventListener('submit', guard(async e => {
   const out = $('#search-results');
   const head = h('p', { class: 'muted small' }, `${r.hits.length} passage(s) · evidence: ${r.strength} · ${r.distinct_docs} document(s) with relevant passages · terms: ${r.terms.join(', ') || '—'}`);
   const notes = r.notes.map(n => h('div', { class: 'notice warn' }, n));
-  out.replaceChildren(head, ...notes, ...r.hits.map(hit => h('div', { class: 'hit' },
+  put(out, head, ...notes, ...r.hits.map(hit => h('div', { class: 'hit' },
     h('div', { class: 'meta' }, `${hit.doc_title} · ${hit.location} · term coverage ${Math.round(hit.coverage * 100)}%`),
     h('div', { class: 'body' }, hit.text.length > 420 ? hit.text.slice(0, 420) + '…' : hit.text),
     h('div', { class: 'actions' }, h('button', { class: 'inspect-btn', onclick: guard(() => openPassage(hit.id)) }, 'Inspect passage')))));
@@ -314,11 +341,11 @@ async function loadConvs() {
   if (!state.docs.length) state.docs = await api('/api/documents');
   state.convs = await api('/api/conversations');
   const list = $('#conv-list');
-  list.replaceChildren(...state.convs.map(c => h('button', { class: 'conv' + (state.current && state.current.id === c.id ? ' active' : ''),
+  put(list, ...state.convs.map(c => h('button', { class: 'conv' + (state.current && state.current.id === c.id ? ' active' : ''),
     onclick: guard(() => openConversation(c.id)) },
     h('span', { class: 't' }, c.title),
     h('span', { class: 'tiny' }, `${c.mode} · ${c.provider === 'demo' ? 'demo' : 'live'} · ${c.message_count} msgs`))));
-  if (!state.convs.length) list.replaceChildren(h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted small' }, 'No saved sessions yet.')));
+  if (!state.convs.length) put(list, h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted small' }, 'No saved sessions yet.')));
 }
 
 async function openConversation(id) {
@@ -348,7 +375,7 @@ $('#new-chat-btn').addEventListener('click', () => {
   const panel = $('#new-panel');
   const title = h('input', { type: 'text', id: 'nc-title', placeholder: 'Session title (optional)' });
   const scope = scopePicker({}), prov = providerPicker();
-  panel.replaceChildren(h('h2', {}, 'New study chat'), h('label', {}, 'Title', title), h('h3', {}, 'Source scope'), scope,
+  put(panel, h('h2', {}, 'New study chat'), h('label', {}, 'Title', title), h('h3', {}, 'Source scope'), scope,
     h('h3', {}, 'Tutor'), prov,
     h('button', { class: 'primary', id: 'nc-start', onclick: guard(async () => {
       if (!confirmLive(prov.value())) return;
@@ -376,15 +403,15 @@ $('#new-exercise-btn').addEventListener('click', () => {
     const r = await api('/api/exercises', { json: { mode: mode.value, level: level.value, scenario_kind: kind.value,
       multi_source: multi.checked, focus: focus.value, historical_topic: topic.value, provider: prov.value(), acknowledge_live: prov.value() === 'live',
       scope: scope.value(), allow_single_source: allowSingle } });
-    if (r.status === 'blocked') { msg.replaceChildren(h('div', { class: 'notice bad' }, r.message)); return; }
+    if (r.status === 'blocked') { put(msg, h('div', { class: 'notice bad' }, r.message)); return; }
     if (r.status === 'needs_confirmation') {
-      msg.replaceChildren(h('div', { class: 'notice warn' }, r.message),
+      put(msg, h('div', { class: 'notice warn' }, r.message),
         h('button', { id: 'ex-single', onclick: guard(() => start(true)) }, 'Continue with a single-source exercise'));
       return;
     }
     state.current = r.conversation; $('#new-panel').hidden = true; renderConversation(); loadConvs();
   };
-  panel.replaceChildren(h('h2', {}, 'New exercise'),
+  put(panel, h('h2', {}, 'New exercise'),
     h('p', { class: 'small muted' }, 'The tutor asks one question at a time and waits for you. The rubric is an app-created learning aid, not a canonical standard; feedback is qualitative.'),
     h('div', { class: 'grid' }, h('label', {}, 'Mode', mode), h('label', {}, 'Level', level), h('label', {}, 'Scenario', kind),
       h('label', {}, 'Focus (optional)', focus), topicRow,
@@ -473,12 +500,12 @@ function renderConversation() {
     h('button', { onclick: guard(async () => {
       if (!confirm('Delete this saved session?')) return;
       await api(`/api/conversations/${c.id}`, { method: 'DELETE' }); state.current = null;
-      $('#conv-view').replaceChildren(h('p', { class: 'muted' }, 'Session deleted.')); loadConvs();
+      put($('#conv-view'), h('p', { class: 'muted' }, 'Session deleted.')); loadConvs();
     }) }, 'Delete'));
   const handoff = h('div', { class: 'tiny' }, 'Export is a manual handoff for NotebookLM or another notes tool — a one-time Markdown snapshot, not synchronization.');
   const summary = c.summary ? h('details', {}, h('summary', {}, 'Earlier turns condensed (app-generated)'), h('div', { class: 'ctx' }, c.summary), h('div', { class: 'tiny' }, c.summary_note)) : null;
   const thread = h('div', { class: 'thread', id: 'thread' }, ...c.messages.map(renderMessage));
-  view.replaceChildren(...[header, banner, scopeLine, scopeDetails, handoff, summary, thread,
+  put(view, ...[header, banner, scopeLine, scopeDetails, handoff, summary, thread,
     c.mode === 'exercise' ? exercisePanel(c) : chatComposer(c)].filter(Boolean));
   const last = thread.lastElementChild;
   if (last) last.scrollIntoView({ block: 'nearest' });

@@ -53,6 +53,14 @@ The suggested tomato #C53E32 is kept for the star only; the text/button tomato w
 
 All pairs meet their target. Focus ring: 3px solid `--focus` with a 2px offset, so it is drawn against the page/surface (rows above), not against a button fill.
 
+## What this pass is (and is not)
+A **visual reskin** plus small fixes. Delivered: tokens, star, typography, restyled existing screens, wrapping of long titles/tokens, a modal accessibility fix (below) and a scope-preview bug fix (a stray "null" line: native \`replaceChildren()\` stringifies nullish children; all calls now go through a \`put()\` helper that drops them).
+**Not delivered** (earlier workspace-redesign ideas; no structural change was made): a persistent source side panel, a simplified session-start flow, a searchable/filterable library, any new workflow. These remain open.
+
+Modal (passage/document view): focus moves into the dialog on open, Tab/Shift+Tab stay inside it, Escape closes, focus returns to the control that opened it, and it has \`role="dialog" aria-modal="true"\` with its heading as the accessible name. Covered by \`tests/e2e/test_dialog_and_scope.py\`.
+
 ## Verification
 - `python scripts/make_screenshots.py` drives the real app (demo provider, synthetic fixtures approved, temp data dir) at 1280px and 390px, deviceScaleFactor 2, and asserts no horizontal scroll. Output: `docs/design/screenshots/` (1-conversation, 1b-passage-panel, 2-library, 3-new-session, 4-session-history, focus-*).
+- Dark-mode shots (`*-dark-*`) and a long-title / long-unbroken-token stress case (`5-long-title-passage-view-dark-narrow.png`) were also captured and inspected; no horizontal scroll at either width in light or dark.
+- Contrast figures cover only the listed pairs; they do not establish full accessibility. No screen-reader testing was done.
 - Not verified: other browsers/OS (the heading font falls back by platform); real-document content; the owner's taste.

@@ -50,6 +50,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font-body);overflow-x:hidden}
+h1,h2,h3,.card,.hit .meta,.badge,.tagchip,.small,.tiny,.loc{overflow-wrap:anywhere}
 h1,h2,h3{font-family:var(--font-head);font-weight:700;line-height:1.25}
 .star{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;background:var(--star);
   -webkit-mask:url(/static/star.svg) center/contain no-repeat;mask:url(/static/star.svg) center/contain no-repeat}
@@ -139,7 +140,7 @@ summary:hover{color:var(--ink)}
 .modal{position:fixed;inset:0;background:rgba(30,26,18,.55);display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow:auto;z-index:20}
 .modal[hidden]{display:none}
 .modal-box{background:var(--panel);border-radius:var(--r);max-width:760px;width:100%;padding:1.2rem 1.3rem;position:relative;border:1px solid var(--line-strong)}
-#modal-body > h2:first-child{padding-right:2rem}
+#modal-body > h2:first-child{padding-right:2.6rem}
 .close{position:absolute;right:.6rem;top:.4rem;font-size:1.4rem;border:none;background:none}
 .ctx{color:var(--muted);white-space:pre-wrap;font-size:.9rem;border-left:2px dashed var(--line-strong);padding-left:.6rem;margin:.3rem 0;max-width:var(--measure);overflow-wrap:anywhere}
 .target{white-space:pre-wrap;background:var(--blush);color:var(--blush-ink);padding:.6rem .8rem;border-radius:var(--r-sm);margin:.3rem 0;max-width:var(--measure);line-height:1.65;overflow-wrap:anywhere;border-left:4px solid var(--accent)}

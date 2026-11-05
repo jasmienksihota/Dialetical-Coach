@@ -64,6 +64,32 @@ with sync_playwright() as p:
         # keyboard focus visible
         pg.keyboard.press("Tab"); pg.screenshot(path=str(OUT / f"focus-{tag}.png"), clip={"x": 0, "y": 0, "width": w, "height": 160})
         ctx.close()
+    # --- dark mode (desktop + narrow) and long-title stress, same running app
+    LONG = "A Very Long Synthetic Document Title That Keeps Going Well Past One Line To Test Wrapping Behaviour " + "x" * 60
+    for tag, w, h in (("desktop", 1280, 900), ("narrow", 390, 844)):
+        ctx = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=2, color_scheme="dark", reduced_motion="reduce")
+        pg = ctx.new_page(); pg.on("dialog", lambda d: d.accept())
+        pg.goto(URL); pg.wait_for_selector(".doc-card")
+        if tag == "narrow":
+            lt = Path(tempfile.mkdtemp()) / "synthetic_long_title.txt"
+            lt.write_text("SYNTHETIC FIXTURE (invented stress text, not a real source).\n\n" + ("A long invented sentence about the fictional lantern workshop that keeps going to test wrapping. " * 12) + "\n\n" + "unbrokenSyntheticTokenWithoutSpaces" * 8 + "\n")
+            pg.set_input_files("#file-input", str(lt))
+            pg.fill("#up-title", LONG); pg.click("#upload-btn"); pg.wait_for_timeout(800)
+        def dshot(name, full=True):
+            pg.wait_for_timeout(2500); pg.evaluate('window.scrollTo(0,0)')
+            assert not scrolls(pg), f"horizontal scroll: {name} dark {tag}"
+            pg.screenshot(path=str(OUT / f"{name}-dark-{tag}.png"), full_page=full)
+        dshot("2-library")
+        if tag == "narrow":
+            pg.locator(".doc-card", has_text="Very Long").locator(".view-btn").click(); pg.wait_for_selector("#modal .chunk")
+            dshot("5-long-title-passage-view", full=False); pg.click("#modal-close")
+        pg.click("#nav button[data-view=sessions]")
+        pg.locator("#conv-list .conv", has_text="Mill town").first.click(); pg.wait_for_selector(".msg.assistant")
+        pg.locator(".evidence summary").first.click()
+        dshot("1-conversation")
+        pg.locator(".cite-chip").first.click(); pg.wait_for_selector("#modal .target")
+        dshot("1b-passage-panel", full=False)
+        ctx.close()
     b.close()
 srv.should_exit = True
 print("ok", sorted(x.name for x in OUT.iterdir()))
