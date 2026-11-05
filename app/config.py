@@ -35,10 +35,23 @@ def load_dotenv(path: Path, environ=None) -> None:
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
+        if line.startswith("export "):
+            line = line[len("export "):]
         key, value = line.split("=", 1)
         key, value = key.strip(), value.strip().strip('"').strip("'")
         if value and key not in environ:
             environ[key] = value
+
+
+TOKENS_CEILING = 4096   # hard upper bound on output tokens per request, whatever .env says
+
+
+def _int(environ, key, default, lo, hi):
+    try:
+        v = int(float(environ.get(key) or default))
+    except ValueError:
+        v = default
+    return max(lo, min(hi, v))
 
 
 def _flag(value: str | None) -> bool:
@@ -55,6 +68,11 @@ class Settings:
     anthropic_model: str | None = None
     anthropic_max_tokens: int = 2048
     force_no_fts: bool = False
+    # --- bounded live-test controls (all enforced server-side) ---
+    live_enabled: bool = False             # TUTOR_LIVE_ENABLED=1 must be set explicitly
+    live_max_requests_per_day: int = 20    # API requests per UTC day, persisted in SQLite
+    live_max_retries: int = 1              # extra attempts after a transient failure (0-2)
+    live_max_input_chars: int = 48000      # refuse to send larger prompts (rough size guard)
 
     @property
     def db_path(self) -> Path:
@@ -66,7 +84,7 @@ class Settings:
 
     @property
     def live_configured(self) -> bool:
-        return bool(self.anthropic_api_key and self.anthropic_model)
+        return bool(self.anthropic_api_key and self.anthropic_model and self.live_enabled)
 
     @property
     def live_setup_message(self) -> str:
@@ -75,10 +93,12 @@ class Settings:
             missing.append("ANTHROPIC_API_KEY")
         if not self.anthropic_model:
             missing.append("ANTHROPIC_MODEL")
+        if not self.live_enabled:
+            missing.append("TUTOR_LIVE_ENABLED=1 (explicit opt-in)")
         if not missing:
             return ""
         return (
-            "Live tutoring is not configured. Set " + " and ".join(missing) +
+            "Live tutoring is not configured. Set " + ", ".join(missing) +
             " in your local .env file (copy .env.example), then restart the app. "
             "These are read only by the local Python server and are separate from any "
             "Claude Code or claude.ai credits. Until then you can use the library, "
@@ -93,6 +113,12 @@ class Settings:
             "live_setup_message": self.live_setup_message,
             "model_configured": bool(self.anthropic_model),
             "api_key_present": bool(self.anthropic_api_key),
+            "live_enabled": self.live_enabled,
+            "model": self.anthropic_model,   # a model ID is configuration, not a secret
+            "live_limits": {"max_requests_per_day": self.live_max_requests_per_day,
+                            "max_output_tokens": self.anthropic_max_tokens,
+                            "max_retries": self.live_max_retries,
+                            "max_input_chars": self.live_max_input_chars},
             "demo_label": DEMO_LABEL,
             "max_upload_mb": self.max_upload_bytes // (1024 * 1024),
             "host": self.host,
@@ -111,10 +137,7 @@ class Settings:
             max_mb = float(environ.get("TUTOR_MAX_UPLOAD_MB") or 25)
         except ValueError:
             max_mb = 25
-        try:
-            max_tokens = int(environ.get("ANTHROPIC_MAX_TOKENS") or 2048)
-        except ValueError:
-            max_tokens = 2048
+        max_tokens = _int(environ, "ANTHROPIC_MAX_TOKENS", 2048, 256, TOKENS_CEILING)
         try:
             port = int(environ.get("TUTOR_PORT") or 8000)
         except ValueError:
@@ -128,4 +151,8 @@ class Settings:
             anthropic_model=(environ.get("ANTHROPIC_MODEL") or None),
             anthropic_max_tokens=max_tokens,
             force_no_fts=_flag(environ.get("TUTOR_FORCE_NO_FTS")),
+            live_enabled=_flag(environ.get("TUTOR_LIVE_ENABLED")),
+            live_max_requests_per_day=_int(environ, "TUTOR_LIVE_MAX_REQUESTS_PER_DAY", 20, 0, 500),
+            live_max_retries=_int(environ, "TUTOR_LIVE_MAX_RETRIES", 1, 0, 2),
+            live_max_input_chars=_int(environ, "TUTOR_LIVE_MAX_INPUT_CHARS", 48000, 2000, 200000),
         )

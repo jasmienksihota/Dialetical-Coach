@@ -80,6 +80,22 @@ CREATE TABLE IF NOT EXISTS flags (
 );
 """
 
+SCHEMA += """
+CREATE TABLE IF NOT EXISTS live_calls (        -- one row per live API request attempt
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT NOT NULL,
+    day TEXT NOT NULL,                          -- UTC date, used for the daily request cap
+    task TEXT NOT NULL,
+    model TEXT NOT NULL,
+    status TEXT NOT NULL,                       -- started | ok | error
+    input_chars INTEGER NOT NULL DEFAULT 0,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    error TEXT                                  -- exception class / status only, never content
+);
+CREATE INDEX IF NOT EXISTS idx_live_day ON live_calls(day);
+"""
+
 FTS_DDL = (
     "CREATE VIRTUAL TABLE chunks_fts USING fts5("
     "text, chunk_id UNINDEXED, tokenize='porter unicode61')"

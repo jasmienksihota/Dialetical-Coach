@@ -130,7 +130,11 @@ async function loadStatus() {
   state.status = await api('/api/status');
   const s = state.status;
   const chip = $('#status-chip');
-  chip.textContent = s.live_configured ? 'Live tutoring available (opt-in per session)' : 'Demo mode only — live not configured';
+  const u = s.live_usage;
+  chip.textContent = !s.live_configured ? 'Demo mode only — live not configured'
+    : (u.verified ? `Live verified ${u.last_success.slice(0, 10)} · ${u.requests_today}/${u.cap_per_day} requests today`
+                  : `Live configured, NOT yet verified · ${u.requests_today}/${u.cap_per_day} requests today`);
+  chip.title = `Model: ${s.model || 'not set'}. Tokens today: ${u.input_tokens_today} in / ${u.output_tokens_today} out. ${u.note}`;
   chip.className = 'chip ' + (s.live_configured ? 'live' : 'demo');
   $('#retrieval-note').textContent = `Retrieval: ${s.retrieval_mode}. ${s.retrieval_note}`;
   $('#up-tags').replaceChildren(...tagBoxes([], 'uptag'));
@@ -303,7 +307,7 @@ function providerPicker() {
     h('label', { class: 'check' }, h('input', { type: 'radio', name: 'prov', value: 'demo', checked: true }),
       'Demo — "Demo: scripted responses, not live tutoring." (offline, nothing leaves your machine)'),
     h('label', { class: 'check' }, h('input', { type: 'radio', name: 'prov', value: 'live', disabled: !live }),
-      'Live model — sends the selected passages and conversation context to Anthropic using your API key'),
+      `Live model (${state.status.model || 'model not set'}) — sends the selected passages and conversation context to Anthropic using your API key. Limits: ${state.status.live_limits.max_requests_per_day} requests/day, ${state.status.live_limits.max_output_tokens} output tokens/request. These are not a dollar cap.`),
     live ? null : h('div', { class: 'notice warn small' }, state.status.live_setup_message));
   root.value = () => root.querySelector('input[name="prov"]:checked').value;
   return root;
@@ -321,7 +325,7 @@ $('#new-chat-btn').addEventListener('click', () => {
     h('h3', {}, 'Tutor'), prov,
     h('button', { class: 'primary', id: 'nc-start', onclick: guard(async () => {
       if (!confirmLive(prov.value())) return;
-      const c = await api('/api/conversations', { json: { title: title.value, provider: prov.value(), scope: scope.value() } });
+      const c = await api('/api/conversations', { json: { title: title.value, provider: prov.value(), acknowledge_live: prov.value() === 'live', scope: scope.value() } });
       await openConversation(c.id);
     }) }, 'Start chat'));
   panel.hidden = false;
@@ -343,7 +347,7 @@ $('#new-exercise-btn').addEventListener('click', () => {
   const start = async (allowSingle = false) => {
     if (!confirmLive(prov.value())) return;
     const r = await api('/api/exercises', { json: { mode: mode.value, level: level.value, scenario_kind: kind.value,
-      multi_source: multi.checked, focus: focus.value, historical_topic: topic.value, provider: prov.value(),
+      multi_source: multi.checked, focus: focus.value, historical_topic: topic.value, provider: prov.value(), acknowledge_live: prov.value() === 'live',
       scope: scope.value(), allow_single_source: allowSingle } });
     if (r.status === 'blocked') { msg.replaceChildren(h('div', { class: 'notice bad' }, r.message)); return; }
     if (r.status === 'needs_confirmation') {

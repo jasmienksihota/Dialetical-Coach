@@ -256,11 +256,11 @@ def test_followup_reuses_previous_cited_passages(tmp_path):
 def test_live_without_credentials_gives_setup_message_and_app_still_works(env):
     st = env.client.get("/api/status").json()
     assert st["live_configured"] is False and "ANTHROPIC_API_KEY" in st["live_setup_message"]
-    r = env.client.post("/api/conversations", json={"provider": "live", "scope": {}})
+    r = env.client.post("/api/conversations", json={"provider": "live", "scope": {}, "acknowledge_live": True})
     assert r.status_code == 400 and "ANTHROPIC_API_KEY" in r.json()["detail"] and "ANTHROPIC_MODEL" in r.json()["detail"]
     assert env.client.get("/api/documents").status_code == 200
     assert env.client.get("/api/search", params={"q": "contradiction"}).status_code == 200
-    r = env.client.post("/api/exercises", json={"provider": "live"})
+    r = env.client.post("/api/exercises", json={"provider": "live", "acknowledge_live": True})
     assert r.status_code == 400
 
 
@@ -293,7 +293,7 @@ class FakeClient:
 def test_api_errors_are_reported_without_leaking_key_or_saving(tmp_path, cls, status, expect):
     secret = "sk-ant-SECRET-1234567890"
     fake = FakeClient(exc=_anthropic_error(cls, status, f"boom {secret}"))
-    prov = AnthropicProvider(secret, "model-id-from-env", 512, client=fake)
+    prov = AnthropicProvider(secret, "model-id-from-env", 512, client=fake, sleep=lambda s: None)
     e = make_env(tmp_path, prov, anthropic_api_key=secret, anthropic_model="model-id-from-env")
     cid = e.chat("live")
     r = e.say(cid, Q)
@@ -304,7 +304,7 @@ def test_api_errors_are_reported_without_leaking_key_or_saving(tmp_path, cls, st
 
 def test_connection_error_is_reported(tmp_path):
     fake = FakeClient(exc=anthropic.APIConnectionError(request=httpx.Request("POST", "https://x")))
-    e = make_env(tmp_path, AnthropicProvider("k", "m", 512, client=fake))
+    e = make_env(tmp_path, AnthropicProvider("k", "m", 512, client=fake, sleep=lambda s: None))
     r = e.say(e.chat("live"), Q)
     assert r.status_code == 502 and "Could not reach" in r.json()["detail"]
 

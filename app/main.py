@@ -16,6 +16,7 @@ from .db import Database
 from .errors import AppError
 from .export import export_markdown
 from .ingest import ingest_file
+from .livecontrol import LiveGuard
 from .modes import LEVELS, MODES, RUBRIC_NOTE
 from .providers import make_provider_factory
 from .retrieval import Scope, get_retriever
@@ -42,6 +43,7 @@ class ScopeIn(BaseModel):
 class ConversationIn(BaseModel):
     title: str = ""
     provider: str = "demo"
+    acknowledge_live: bool = False
     scope: ScopeIn = Field(default_factory=ScopeIn)
 
 
@@ -73,6 +75,7 @@ class ExerciseIn(BaseModel):
     focus: str = ""
     historical_topic: str = ""
     provider: str = "demo"
+    acknowledge_live: bool = False
     scope: ScopeIn = Field(default_factory=ScopeIn)
     allow_single_source: bool = False
 
@@ -86,13 +89,15 @@ class ExerciseActionIn(BaseModel):
 def create_app(settings: Settings | None = None, provider_factory=None) -> FastAPI:
     settings = settings or Settings.from_env()
     db = Database(settings.db_path, force_no_fts=settings.force_no_fts)
+    guard = LiveGuard(db, settings)
     svc = Services(settings=settings, db=db, retriever=get_retriever(db),
-                   make_provider=provider_factory or make_provider_factory(settings))
+                   make_provider=provider_factory or make_provider_factory(settings, guard))
     allowed_hosts = set(LOOPBACK) | {settings.host}
 
     app = FastAPI(title="Source-Grounded Reasoning Tutor", docs_url=None, redoc_url=None,
                   openapi_url=None)
     app.state.svc = svc
+    app.state.guard = guard
 
     @app.middleware("http")
     async def local_only(request: Request, call_next):
@@ -123,7 +128,7 @@ def create_app(settings: Settings | None = None, provider_factory=None) -> FastA
                 "approved": c.execute("SELECT COUNT(*) FROM documents WHERE approved=1").fetchone()[0],
                 "conversations": c.execute("SELECT COUNT(*) FROM conversations").fetchone()[0],
             }
-        return {**settings.public_dict(), "retrieval_mode": db.retrieval_mode,
+        return {**settings.public_dict(), "live_usage": guard.summary(), "retrieval_mode": db.retrieval_mode,
                 "retrieval_note": ("Lexical (word-matching) retrieval only. It does not match "
                                    "synonyms or paraphrases and is not semantic or hybrid search."),
                 "tags": [{"slug": s, "label": l} for s, l in TAGS], "counts": counts,
@@ -206,14 +211,18 @@ def create_app(settings: Settings | None = None, provider_factory=None) -> FastA
                 "distinct_docs": res.distinct_docs, "terms": res.terms, "mode": res.mode}
 
     # ----------------------------------------------------------------- conversations
-    def _check_provider(kind: str):
+    def _check_provider(kind: str, acknowledged: bool = False):
         svc.make_provider(kind)    # raises AppError with a setup message if live is unconfigured
+        if kind == "live" and not acknowledged:
+            raise AppError("Live mode must be acknowledged explicitly: it sends selected passages and "
+                           "conversation context to the model provider and uses your API balance "
+                           "(acknowledge_live=true).", 400)
 
     @app.post("/api/conversations")
     def new_conversation(body: ConversationIn):
         if body.provider not in ("demo", "live"):
             raise AppError("provider must be 'demo' or 'live'.", 400)
-        _check_provider(body.provider)
+        _check_provider(body.provider, body.acknowledge_live)
         with db.tx() as c:
             cid = convs.create_conversation(c, body.title or "New study chat", "chat", body.provider,
                                             body.scope.model_dump())
@@ -266,6 +275,7 @@ def create_app(settings: Settings | None = None, provider_factory=None) -> FastA
     def start_exercise(body: ExerciseIn):
         if body.provider not in ("demo", "live"):
             raise AppError("provider must be 'demo' or 'live'.", 400)
+        _check_provider(body.provider, body.acknowledge_live)
         return exercises.start_exercise(svc, {**body.model_dump(), "scope": body.scope.model_dump()})
 
     @app.post("/api/conversations/{cid}/exercise")

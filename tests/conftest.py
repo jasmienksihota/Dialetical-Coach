@@ -111,7 +111,8 @@ class Env:
 
     def chat(self, provider="demo", scope=None, title="t"):
         r = self.client.post("/api/conversations",
-                             json={"title": title, "provider": provider, "scope": scope or {}})
+                             json={"title": title, "provider": provider, "scope": scope or {},
+                                   "acknowledge_live": provider == "live"})
         assert r.status_code == 200, r.text
         return r.json()["id"]
 
