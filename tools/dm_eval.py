@@ -11,13 +11,14 @@ documents, and proposes candidate passages for each concept. It never approves, 
 and a candidate is NOT support: the app has judged nothing. You decide, by hand, in a local file.
 
 `readiness` reports which evaluation cases are traceable to passages YOU confirmed. A case is READY only when
-every concept it is anchored to is either 'confirmed' (with passage IDs that exist in approved documents) or
-'not_addressed' (you reviewed the library and it does not cover the concept).
+every concept it is anchored to is either 'supported' (reviewed passages whose IDs exist in approved primary documents,
+each with a reviewer note) or 'not_found_in_reviewed' (with a 'reviewed_scope' saying what was actually reviewed; a failed
+word search is NOT proof a concept is absent). 'needs_investigation' is not resolved.
 
 Confirmation file (local; git-ignored under data/):
   {"concepts": {"contradiction_and_lookalikes": {
-       "status": "confirmed",            # or "not_addressed"
-       "passages": [{"chunk_id": "...", "author": "...", "note": "your own words on what it shows"}],
+       "status": "supported",            # or "not_found_in_reviewed" (+ "reviewed_scope") or "needs_investigation"
+       "passages": [{"chunk_id": "...", "author": "...", "note": "reviewer's words on what it shows"}],
        "reviewed": "2026-11-05"}}}
 """
 from __future__ import annotations
@@ -36,7 +37,8 @@ from app.library import location_label  # noqa: E402
 from app.retrieval import LexicalRetriever, Scope  # noqa: E402
 
 EVAL = ROOT / "eval" / "dialectical"
-RESOLVED = ("confirmed", "not_addressed")
+STATUSES = ("supported", "not_found_in_reviewed", "needs_investigation")
+RESOLVED = ("supported", "not_found_in_reviewed")
 
 
 def load_map() -> dict:
@@ -86,8 +88,8 @@ def render_review(concept_map: dict, found: dict) -> str:
     lines = ["# Concept review sheet (candidates only)", "",
              "**These are word-match candidates from your APPROVED documents. The app has not judged whether any of them "
              "supports anything.** Read the passage in context (Library -> View extracted text), then record your decision "
-             "by hand in `data/concept_confirmations.json`. A concept with no candidates may be genuinely absent from the "
-             "library or may use words not in the search lists; edit `eval/dialectical/concept_map.json` to add terms.", ""]
+             "by hand in `data/concept_confirmations.json`. A concept with no candidates is NOT shown to be absent: the library may use "
+             "different words than the search lists (edit `eval/dialectical/concept_map.json` to add terms).", ""]
     for c in concept_map["concepts"]:
         lines += [f"## {c['title']}  (`{c['id']}`)", f"*Question for the library:* {c['question_for_the_library']}", ""]
         cands = found.get(c["id"], [])
@@ -103,7 +105,8 @@ def render_review(concept_map: dict, found: dict) -> str:
 
 # ------------------------------------------------------------------ readiness
 def validate_confirmations(conn, concept_map: dict, conf: dict) -> tuple[dict, list[str]]:
-    """Return ({concept_id: 'confirmed'|'not_addressed'|'unresolved'}, problems)."""
+    """Return ({concept_id: status}, problems). Statuses: supported | not_found_in_reviewed |
+    needs_investigation | unresolved (nothing recorded)."""
     ids = {c["id"] for c in concept_map["concepts"]}
     status, problems = {c: "unresolved" for c in ids}, []
     for cid, entry in (conf.get("concepts") or {}).items():
@@ -111,13 +114,19 @@ def validate_confirmations(conn, concept_map: dict, conf: dict) -> tuple[dict, l
             problems.append(f"{cid}: not a concept in concept_map.json")
             continue
         st = entry.get("status")
-        if st == "not_addressed":
-            status[cid] = "not_addressed"
-        elif st == "confirmed":
+        if st == "needs_investigation":
+            status[cid] = "needs_investigation"
+        elif st == "not_found_in_reviewed":
+            # A failed word search is NOT proof the library never addresses a concept, so say what was reviewed.
+            if (entry.get("reviewed_scope") or "").strip():
+                status[cid] = "not_found_in_reviewed"
+            else:
+                problems.append(f"{cid}: 'not_found_in_reviewed' needs 'reviewed_scope' (which documents/passages were actually reviewed)")
+        elif st == "supported":
             passages = entry.get("passages") or []
             ok = True
             if not passages:
-                problems.append(f"{cid}: 'confirmed' but lists no passages")
+                problems.append(f"{cid}: 'supported' but lists no passages")
                 ok = False
             for p in passages:
                 row = (conn.execute(
@@ -133,20 +142,24 @@ def validate_confirmations(conn, concept_map: dict, conf: dict) -> tuple[dict, l
                     problems.append(f"{cid}: passage {p.get('chunk_id')} is secondary notes, not a primary source")
                     ok = False
                 if not (p.get("note") or "").strip():
-                    problems.append(f"{cid}: passage {p.get('chunk_id')} has no note in your own words")
+                    problems.append(f"{cid}: passage {p.get('chunk_id')} has no note in the reviewer's own words")
                     ok = False
-            status[cid] = "confirmed" if ok else "unresolved"
+            status[cid] = "supported" if ok else "unresolved"
         else:
-            problems.append(f"{cid}: status must be 'confirmed' or 'not_addressed'")
+            problems.append(f"{cid}: status must be one of {', '.join(STATUSES)}")
     return status, problems
 
 
-def readiness(conn, concept_map: dict, cases: dict, conf: dict) -> dict:
+def readiness(conn, concept_map: dict, cases: dict, conf: dict, diagnostic_only: bool = False) -> dict:
     status, problems = validate_confirmations(conn, concept_map, conf)
     rows = []
     for case in cases["cases"]:
+        if diagnostic_only and not case.get("first_diagnostic"):
+            continue
         missing = [a for a in case["anchors"] if status.get(a) not in RESOLVED]
-        rows.append({"case": case["id"], "kind": case["kind"], "ready": not missing, "missing": missing})
+        limits_only = [a for a in case["anchors"] if status.get(a) == "not_found_in_reviewed"]
+        rows.append({"case": case["id"], "kind": case["kind"], "ready": not missing, "missing": missing,
+                     "limits_only": limits_only})
     return {"concept_status": status, "problems": problems, "cases": rows,
             "ready_count": sum(r["ready"] for r in rows), "total": len(rows)}
 
@@ -217,6 +230,7 @@ def main(argv=None) -> int:
     r = sub.add_parser("readiness")
     r.add_argument("--data-dir", default=str(ROOT / "data"))
     r.add_argument("--confirmations", default=None)
+    r.add_argument("--diagnostic", action="store_true", help="only the 3-case first diagnostic")
     sub.add_parser("baseline")
     c = sub.add_parser("check")
     c.add_argument("file")
@@ -240,7 +254,7 @@ def main(argv=None) -> int:
         conf_path = Path(a.confirmations) if a.confirmations else data_dir / "concept_confirmations.json"
         conf = json.loads(conf_path.read_text(encoding="utf-8")) if conf_path.is_file() else {"concepts": {}}
         conn = open_readonly(data_dir) if (data_dir / "tutor.db").is_file() else None
-        rep = readiness(conn, cmap, cases, conf)
+        rep = readiness(conn, cmap, cases, conf, a.diagnostic)
         print(f"Confirmations file: {conf_path} ({'found' if conf_path.is_file() else 'not found: nothing is confirmed'})")
         for cid, st in rep["concept_status"].items():
             print(f"  {cid:36} {st}")
@@ -249,8 +263,9 @@ def main(argv=None) -> int:
         print()
         for row in rep["cases"]:
             print(f"  {row['case']:4} {'READY    ' if row['ready'] else 'NOT READY'} {row['kind']}"
-                  + ("" if row["ready"] else f"   (unresolved: {', '.join(row['missing'])})"))
-        print(f"\n{rep['ready_count']}/{rep['total']} cases are traceable to owner-confirmed passages. "
+                  + ("" if row["ready"] else f"   (unresolved: {', '.join(row['missing'])})")
+                  + (f"   [limits-only for: {', '.join(row['limits_only'])}]" if row["limits_only"] else ""))
+        print(f"\n{rep['ready_count']}/{rep['total']} cases are traceable to reviewed passages. "
               "A READY case still needs HUMAN scoring of tutor output; this tool does not score anything.")
         return 0 if rep["ready_count"] else 1
     if a.cmd == "baseline":

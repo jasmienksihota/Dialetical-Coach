@@ -14,6 +14,9 @@ app's developer; none from a source, author or real event), in paired contrasts:
 The rubric is an **app-created learning aid, not a canonical standard**; qualitative; no scores. Every case is marked
 `owner_review: pending`: the drafter's pairings and expectations may be wrong and need your edits.
 
+## First live run: a small three-case diagnostic (not the full set)
+Only **C2a** (terminology without explanation), **C1b** (plain-language relational/developmental analysis) and **C3a** (contradiction claimed, not yet justified) — see `DIAGNOSTIC_PACKET.md`. Worst case with defaults is ~12 requests (3 turns × (1 answer + 1 repair) × (1 + 1 retry)); a request count, not a dollar figure. The full 13-case set is a later step. **A live run needs separate spending authorization and has not happened.** At best it shows whether, on these three cases, the tutor asks for evidence and avoids rewarding jargon; it would not show the tutor understands dialectical materialism.
+
 ## Success / failure criteria
 Each case lists `tutor_should` and `tutor_should_not`, each tagged:
 - `mechanical:M_*` — a surface check in `tools/dm_eval.py check` (thesis/antithesis wording absent from the passages; terminology praise;
@@ -24,7 +27,7 @@ A case **passes** only if every mechanical check passes **and** a human rater ma
 `tutor_should_not` triggered. Report per-criterion counts; there is no aggregate score or ranking.
 
 ## Traceability to sources
-Expected behaviours that depend on what authors say are valid only after **you** confirm passages (or mark `not_addressed`)
+Expected behaviours that depend on what authors say are valid only after a reviewer records reviewed passages (`supported`) or what was reviewed without finding any (`not_found_in_reviewed`)
 for the case's anchor concepts. `python tools/dm_eval.py readiness` lists which cases are READY. **Currently 0/13**, because no
 passages are confirmed, and none can be from this workspace.
 
@@ -38,7 +41,7 @@ with disagreements logged — never the sole or deciding evidence.
 `tests/test_dm_eval_contract.py`: the files parse; every case is labelled invented and carries criteria, anchors and an owner-review flag;
 the concept map has no source text; the five requested example types exist in pairs; real author names appear only in concept probes;
 `probe` is read-only and uses approved primary documents only; `readiness` rejects unapproved, missing, secondary-note and unannotated
-passages; the surface checks behave as specified; the demo wording does not call keyword matches evidence. These verify **structure and
+passages, and `not_found_in_reviewed` without a `reviewed_scope`; the surface checks behave as specified; the demo wording does not call keyword matches evidence. These verify **structure and
 honesty of the materials**.
 
 ## NOT verified (no live run has occurred)
@@ -48,6 +51,5 @@ the library lacks; or revises appropriately. **Philosophical performance is unte
 changes prompts, data and checks.
 
 ## Cost note for a future live run
-13 cases × 1 turn each is 13 generations; with the defaults (1 citation repair, 1 retry) the worst case is ~4 requests per turn (≈52).
-The default daily cap is 20, so a full run needs several days or a deliberate cap change. These are request counts, not dollars; set a
+The full set (13 cases × 1 turn) would be ≈52 requests at worst; the default daily cap is 20. Start with the three-case diagnostic (≈12). These are request counts, not dollars; set a
 provider-side spend limit first. Not run; needs your explicit go-ahead.

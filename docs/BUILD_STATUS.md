@@ -69,19 +69,19 @@ real-document checks. Only fixes for defects those checks reveal should be made.
 ## Remaining
 Scope editing UI for existing chats; streaming; exercise history view; the items above.
 
-## Dialectical-materialism milestone — design stage (branch `claude/dm-concepts-eval`, from `228563b`)
-Core requirement: the app must support learning and practising dialectical materialism from the owner's approved sources.
-**Not achieved, not claimed.** What exists:
-- `docs/dialectical/AUDIT.md` — inspection of the workflow and prompts (8 findings, e.g. app-authored theory baked into `modes.py`; generic rubric; authorship not sent to the model; scripted demo cannot tell jargon from reasoning).
-- `eval/dialectical/concept_map.json` + `docs/dialectical/CONCEPT_MAP.md` — a **skeleton of questions for the library with NO passages and no claims about any author**. Every concept is `unsupported`. Real passages can only come from the owner's approved library via `tools/dm_eval.py probe` (read-only) and the owner's own confirmation file.
-- `eval/dialectical/cases.json` — 13 INVENTED cases in the requested pairs (static vs relational; empty vocabulary vs plain substance; contradiction not yet justified + tradeoff/inconsistency look-alikes; new evidence revision; 3 concept probes incl. Cartesian dualism), with observable `tutor_should` / `tutor_should_not` criteria, an app-created qualitative rubric, `owner_review: pending`.
-- `docs/dialectical/PROMPT_CHANGES.md` — 7 proposed prompt/rubric changes, **proposed and not applied** (except P7).
-- `tools/dm_eval.py` — `probe`, `readiness`, `baseline`, `check` (offline; no API).
-- Applied: scripted demo feedback no longer says "Visible in your answer"; it says keyword matches do not show support.
+## Dialectical-materialism milestone — preparatory work (branch `claude/dm-concepts-eval`)
+Core requirement: learning and practising dialectical materialism from the owner's approved sources. **Not achieved, not claimed.** The audit and
+evaluation scaffold are *preparatory*; they are not evidence that the tutor understands dialectical materialism.
 
-Tests run on this branch: `pytest -q --ignore=tests/e2e` **260 passed** (20 new contract tests in `tests/test_dm_eval_contract.py`); `pytest -q tests/e2e` **3 passed**.
-Observed: `tools/dm_eval.py baseline` — the demo's keyword matcher matched the empty-jargon response and the premature-"contradiction" responses but nothing in the best-supported revision (C4b). Readiness today: **0/13** cases traceable to confirmed passages.
+Implemented (bounded, unverified against a real model):
+- **Evidence metadata:** every passage sent to the model now carries recorded author, title, date, edition, passage ID, location and primary/secondary status; unknown fields read "not recorded" (never guessed); tag-breaking metadata is neutralised; a system-prompt rule requires attribution to the named author. The app still cannot tell an author's text from an editor's/translator's note inside a document (documented, not claimed solved).
+- **Misleading assessment removed:** the demo no longer shows keyword matching to the learner; its feedback is a clearly scripted prompt, and its hints/analysis/reflection no longer carry developer theory. The matcher survives only as a diagnostic (`tools/dm_eval.py baseline`).
+- **Developer theory vs library claims:** dialectical mode objective/guidance neutralised; `docs/dialectical/TEACHING_CONTRACT.md` separates application rules from claims that need passage support (provisional; **not wired** into live prompts).
+- **Evidence statuses:** `supported` / `not_found_in_reviewed` (needs `reviewed_scope`) / `needs_investigation`; the stronger "not addressed by this library" is not used.
+- **First diagnostic reduced to three cases** (C2a, C1b, C3a; five concepts) — `docs/dialectical/DIAGNOSTIC_PACKET.md`: template only, supporting passages PENDING (no library in the cloud workspace), nothing reviewed.
+- `docs/dialectical/LOCAL_PROBE_INSTRUCTIONS.md` for the local session (read-only probe; nothing leaves the Mac without the owner's permission).
 
-**Verified (contract level only):** the materials parse, are labelled invented/app-created, have observable criteria, contain no source text; the probe is read-only and approved-primary-only; readiness rejects unapproved/missing/secondary/unannotated passages; surface checks behave as specified.
-**NOT verified:** that any model, with any proposed prompt, reasons dialectically, withholds "contradiction" when unjustified, keeps authors apart, or admits insufficient evidence; any real passage; the owner's judgement of the cases. No live call was made; no model was retrained; no documents were downloaded, imported or approved.
-**Needs the owner:** run `probe` against the approved library, confirm/mark concepts, review and edit the cases, decide which prompt changes to adopt; then a live evaluation (spend limit + human blind rating).
+Tests run on this branch: `pytest -q --ignore=tests/e2e` **267 passed**; `pytest -q tests/e2e` **3 passed**.
+**Verified (contract level):** prompt rendering includes recorded metadata and "not recorded"; metadata cannot break the wrapper; demo learner-facing text has no keyword/theory wording across a full exercise; probe is read-only; statuses and readiness behave as specified.
+**NOT verified:** any live-model behaviour; any real passage or author interpretation; whether the changes help the learner. No live call, no corpus download, no approval change, no retraining.
+**Next:** the local session runs the read-only probe on the approved library and prepares a local evidence packet for the three diagnostic cases; the owner approves sharing or spending only when asked. A live diagnostic needs separate spending authorization.

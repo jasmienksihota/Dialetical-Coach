@@ -1,10 +1,10 @@
 # Proposed prompt and rubric changes
 
-**Status: PROPOSED, not applied** (except P7). None has been run against a real model. Applying them changes live
+**Status: PROPOSED, not applied** — except P1 (mode text neutralised), P3 (author/date/edition now sent) and P7 (keyword feedback removed), which are applied on this branch and unverified against a real model. The rules in P2/P6 are now organised in `TEACHING_CONTRACT.md` (application rules vs claims needing passages). None has been run against a real model. Applying them changes live
 tutoring behaviour, which cannot be verified without the owner's key, a provider-side spend limit and explicit go-ahead.
 Evaluate with `docs/dialectical/EVALUATION.md` before adopting.
 
-## P1 — Remove app-authored theory from the dialectical mode (`modes.py`)
+## P1 — Remove app-authored theory from the dialectical mode (`modes.py`) — PARTLY APPLIED (objective and guidance; `seed_query` unchanged)
 Replace `guidance`/`objective`/`seed_query` so the app asserts no theory:
 - `objective`: "Practise explaining a situation from its concrete facts, using only concepts the selected passages supply, attributed to their authors."
 - `guidance`: "Concepts come from the supplied passages only. Do not introduce a term the passages do not use."
@@ -24,7 +24,7 @@ DIALECTICAL-MATERIALISM PRACTICE (app-created; derive every concept from the sup
 ```
 *Risk:* a long rules block can crowd the model's attention or be followed only superficially; "ask one question" must still hold. *Test:* contract tests check the text is present and the surface checks run; philosophical performance is untested.
 
-## P3 — Give the model authorship (`prompts.render_passages`)
+## P3 — Give the model authorship (`prompts.render_passages`) — APPLIED
 Add `author`, `date`, `edition` attributes per passage when recorded, and the literal value "not recorded" when missing,
 so statements can be attributed and differences noticed. *Risk:* none for privacy (all local metadata the owner entered); longer prompts. *Test:* contract test on rendered prompt.
 
@@ -42,6 +42,5 @@ fidelity to passages and author differences). Labelled app-created, qualitative,
 Covered by P2. Add a surface check (`tools/dm_eval.py check`) that flags terminology praise, flat "this is a contradiction"
 declarations, thesis/antithesis wording absent from the passages, and extra questions. Surface checks are heuristics.
 
-## P7 — Scripted demo wording (APPLIED on this branch)
-Demo feedback now says "Keyword matches … does not show an idea is supported" instead of "Visible in your answer". It still
-assesses nothing; it exists to demonstrate the interaction.
+## P7 — Scripted demo feedback (APPLIED on this branch)
+Keyword matching is no longer shown to the learner at all: demo feedback is a clearly scripted prompt ("this demo cannot assess your reasoning"), the demo's hint, analysis and reflection text no longer carry developer theory, and the keyword matcher survives only as a diagnostic in `tools/dm_eval.py baseline`.

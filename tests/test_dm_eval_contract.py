@@ -129,9 +129,14 @@ def test_documents_state_status_and_limits_plainly():
 def test_proposals_are_not_silently_applied():
     """If P2 is adopted, update PROMPT_CHANGES.md and this test together."""
     from app import modes, prompts
-    assert "DIALECTICAL-MATERIALISM PRACTICE" not in prompts.EXERCISE_RULES
+    assert "DIALECTICAL-MATERIALISM PRACTICE" not in prompts.EXERCISE_RULES                      # the contract is not wired in
     assert "DIALECTICAL-MATERIALISM PRACTICE" in (ROOT / "docs" / "dialectical" / "PROMPT_CHANGES.md").read_text()
-    assert "relationships and tensions inside a situation" in modes.MODES["dialectical"]["guidance"]   # F1 still open
+    tc = (ROOT / "docs" / "dialectical" / "TEACHING_CONTRACT.md").read_text()
+    assert "PROVISIONAL and not yet wired" in tc and "Application rules" in tc and "Requires passage-level support" in tc
+    d = modes.MODES["dialectical"]                                                                  # P1 applied: no developer theory
+    for text in (d["guidance"], d["objective"]):
+        assert not re.search(r"internal|outside conditions|main issue|tensions", text, re.I)
+    assert "concepts the selected" in d["objective"] and "attributed to" in d["guidance"]
 
 
 # ------------------------------------------------------------------ probe: read-only, approved primary only
@@ -185,35 +190,63 @@ def test_readiness_accepts_only_valid_confirmations(env):
     inject = chunk_ids(env, "inject")[0]                                       # unapproved document
     conn = dm.open_readonly(env.settings.data_dir)
     conf = {"concepts": {
-        "concrete_conditions": {"status": "confirmed", "passages": [{"chunk_id": ok, "author": "synthetic", "note": "my words"}]},
-        "relations_interdependence": {"status": "confirmed", "passages": [{"chunk_id": ok, "note": "my words"}]},
-        "change_development_history": {"status": "not_addressed"},
-        "evidence_for_opposed_aspects": {"status": "confirmed", "passages": [{"chunk_id": inject, "note": "x"}]},
-        "materialism_idealism": {"status": "confirmed", "passages": []},
-        "dialectical_vs_metaphysical_method": {"status": "confirmed", "passages": [{"chunk_id": "nope-0001", "note": "x"}]},
-        "author_differences": {"status": "confirmed", "passages": [{"chunk_id": ok}]},
-        "not_a_concept": {"status": "confirmed"},
-        "cartesian_mind_body_dualism": {"status": "maybe"},
+        "concrete_conditions": {"status": "supported", "passages": [{"chunk_id": ok, "author": "synthetic", "note": "reviewer words"}]},
+        "relations_interdependence": {"status": "supported", "passages": [{"chunk_id": ok, "note": "reviewer words"}]},
+        "change_development_history": {"status": "not_found_in_reviewed", "reviewed_scope": "synthetic mill notes only"},
+        "evidence_for_opposed_aspects": {"status": "supported", "passages": [{"chunk_id": inject, "note": "x"}]},
+        "materialism_idealism": {"status": "supported", "passages": []},
+        "dialectical_vs_metaphysical_method": {"status": "supported", "passages": [{"chunk_id": "nope-0001", "note": "x"}]},
+        "author_differences": {"status": "supported", "passages": [{"chunk_id": ok}]},
+        "contradiction_and_lookalikes": {"status": "not_found_in_reviewed"},                  # no reviewed_scope
+        "concrete_analysis_x": {"status": "supported"},
+        "cartesian_mind_body_dualism": {"status": "needs_investigation"},
     }}
     rep = dm.readiness(conn, CMAP, CASES, conf)
     st = rep["concept_status"]
-    assert st["concrete_conditions"] == "confirmed" and st["change_development_history"] == "not_addressed"
+    assert st["concrete_conditions"] == "supported"
+    assert st["change_development_history"] == "not_found_in_reviewed"
+    assert st["cartesian_mind_body_dualism"] == "needs_investigation"            # recorded, but not "resolved"
     for bad in ("evidence_for_opposed_aspects", "materialism_idealism", "dialectical_vs_metaphysical_method",
-                "author_differences", "cartesian_mind_body_dualism"):
+                "author_differences", "contradiction_and_lookalikes"):
         assert st[bad] == "unresolved", bad
     problems = " | ".join(rep["problems"])
-    for needle in ("UNAPPROVED", "lists no passages", "does not exist", "no note in your own words", "not a concept", "status must be"):
+    for needle in ("UNAPPROVED", "lists no passages", "does not exist", "no note in the reviewer's own words",
+                   "not a concept", "needs 'reviewed_scope'"):
         assert needle in problems, needle
-    ready = {r["case"] for r in rep["cases"] if r["ready"]}
-    assert ready == set() or ready <= {"C1a"}
-    assert "C1a" in ready and "C1b" not in ready                                 # C1b also needs the (invalid) evidence concept
+    rows = {r["case"]: r for r in rep["cases"]}
+    assert rows["C1a"]["ready"] and rows["C1a"]["limits_only"] == ["change_development_history"]   # limits-only, flagged
+    assert not rows["C1b"]["ready"]                                                # still needs the invalid evidence concept
+    assert not rows["K3"]["ready"]
+
+
+def test_a_failed_search_alone_never_becomes_a_strong_claim(env):
+    conn = dm.open_readonly(env.settings.data_dir)
+    st, problems = dm.validate_confirmations(conn, CMAP, {"concepts": {"cartesian_mind_body_dualism": {"status": "not_addressed"}}})
+    assert st["cartesian_mind_body_dualism"] == "unresolved" and "status must be" in problems[0]   # old strong status is refused
+    assert "not_addressed" not in json.dumps(CMAP) and "not_addressed" not in (ROOT / "docs" / "dialectical" / "CONCEPT_MAP.md").read_text()
+    assert set(CMAP["support_policy"]["statuses"]) == {"unsupported", "supported", "not_found_in_reviewed", "needs_investigation"}
+    assert "NOT the same as" in CMAP["support_policy"]["statuses"]["not_found_in_reviewed"]
+
+
+def test_first_diagnostic_is_exactly_three_cases_and_needs_five_concepts(env):
+    diag = [c for c in CASES["cases"] if c.get("first_diagnostic")]
+    assert {c["id"] for c in diag} == {"C2a", "C1b", "C3a"} and len(diag) == 3
+    assert {a for c in diag for a in c["anchors"]} == {"concrete_conditions", "relations_interdependence",
+        "change_development_history", "evidence_for_opposed_aspects", "contradiction_and_lookalikes"}
+    conn = dm.open_readonly(env.settings.data_dir)
+    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {}}, diagnostic_only=True)
+    assert {r["case"] for r in rep["cases"]} == {"C2a", "C1b", "C3a"} and len(rep["cases"]) == 3 and rep["ready_count"] == 0
+    packet = " ".join((ROOT / "docs" / "dialectical" / "DIAGNOSTIC_PACKET.md").read_text().split())
+    assert packet.count("PENDING (local probe)") >= 6 and "NOTHING reviewed" in packet and "INVENTED" in packet
+    assert "needs separate spending authorization" in " ".join((ROOT / "docs" / "dialectical" / "EVALUATION.md").read_text().split()) or \
+           "separate spending authorization" in " ".join((ROOT / "docs" / "dialectical" / "EVALUATION.md").read_text().split())
 
 
 def test_secondary_notes_cannot_confirm_a_concept(env):
     env.client.post(f"/api/documents/{env.ids['notes']}/approval", json={"approved": True})
     sec = chunk_ids(env, "notes")[0]
     conn = dm.open_readonly(env.settings.data_dir)
-    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {"concrete_conditions": {"status": "confirmed",
+    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {"concrete_conditions": {"status": "supported",
                        "passages": [{"chunk_id": sec, "note": "x"}]}}})
     assert rep["concept_status"]["concrete_conditions"] == "unresolved" and "secondary notes" in " ".join(rep["problems"])
 
@@ -270,11 +303,22 @@ def test_scripted_demo_keyword_baseline_cannot_discriminate_the_cases():
     assert "Visible in your answer" not in open(demo_script.__file__).read()
 
 
-def test_demo_feedback_wording_does_not_treat_keywords_as_support(env):
+def test_demo_learner_facing_text_has_no_keyword_assessment_or_developer_theory(env):
+    """Walk a whole demo exercise; scripted coaching/interpretation text must not assess or carry theory."""
     env.client.post("/api/exercises", json={})
     cid = env.client.get("/api/conversations").json()[0]["id"]
     case = next(c for c in CASES["cases"] if c["id"] == "C2a")
-    r = env.client.post(f"/api/conversations/{cid}/exercise", json={"action": "answer", "text": case["learner_input"]}).json()
-    msgs = [m for m in r["conversation"]["messages"] if m["role"] == "assistant"]
-    text = " ".join(b["text"] for b in msgs[-1]["blocks"])
-    assert "Keyword matches" in text and "does not show an idea is supported" in text and "Visible in your answer" not in text
+    seq = [("answer", case["learner_input"]), ("hint", ""), ("hint", ""), ("answer", "More detail about records."),
+           ("answer", "A revision."), ("show_analysis", ""), ("finish", "")]
+    conv = None
+    for action, text in seq:
+        r = env.client.post(f"/api/conversations/{cid}/exercise", json={"action": action, "text": text, "confirm": True})
+        assert r.status_code == 200, (action, r.text)
+        conv = r.json()["conversation"]
+    texts = [b["text"] for m in conv["messages"] if m["role"] == "assistant" for b in m["blocks"]
+             if b["type"] in ("coaching", "interpretation") and b.get("purpose") in ("feedback", "hint", "analysis", "reflection", "next_steps")]
+    assert len(texts) >= 8
+    for t in texts:
+        assert not re.search(r"keyword|matched|visible in your answer|internal|external|principal|outside condition|thesis|dialectic|contradict|tension", t, re.I), t
+    fb = next(t for t in texts if t.startswith("Demo feedback"))
+    assert "cannot assess your reasoning" in fb and "nothing here evaluates it" in fb

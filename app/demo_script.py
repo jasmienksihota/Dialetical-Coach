@@ -12,6 +12,8 @@ from .modes import MODES, RUBRIC, RUBRIC_NOTE
 
 _SENT_END = re.compile(r"(?<=[.!?])\s+")
 
+# DIAGNOSTIC ONLY (used by tools/dm_eval.py baseline). Keyword matching cannot tell reasoning from jargon; it is
+# never shown to the learner.
 SIGNALS = {
     "evidence": [r"\bobserv", r"\bevidence\b", r"\bassum", r"\binfer", r"\bstated\b", r"\bfacts?\b",
                  r"\bthe (story|text|passage) (says|tells|states)", r"\bwe (are )?told\b"],
@@ -139,38 +141,24 @@ def _open(req):
     return {"blocks": blocks}
 
 
-def _seen_missing(text, skip=()):
-    seen = analyse(text)
-    got = [LABEL[k] for k, _ in RUBRIC if seen[k] and k not in skip]
-    miss = [LABEL[k] for k, _ in RUBRIC if not seen[k] and k not in skip]
-    return got, miss
-
-
 def _feedback(req):
+    """Scripted placeholder. It deliberately does NOT assess the answer: keyword matching cannot tell reasoning
+    from jargon (see tools/dm_eval.py baseline), so none of it is shown to the learner."""
     ctx, ps = req.context, req.passages
     spec = MODES[ctx["mode"]]
     phase, text = ctx["phase"], ctx["user_text"]
-    skip = () if phase in ("revision", "review") else ("revision",)
-    got, miss = _seen_missing(text, skip)
-    fb = ("Demo feedback (keyword matching by a script, NOT an evaluation of your thinking). "
-          + ("Keyword matches: " + "; ".join(got) + ". " if got else "No rubric keyword matched. ")
-          + ("No keyword match for: " + "; ".join(miss) + ". " if miss else "")
-          + "A keyword match does not show an idea is supported by evidence or even understood, and no match "
-            "does not show it is absent; say explicitly what facts your explanation rests on.")
-    if phase in ("revision", "review") and ctx.get("attempts"):
-        before = analyse(ctx["attempts"][0])
-        now = analyse(text)
-        gained = [LABEL[k] for k, _ in RUBRIC if now[k] and not before[k]]
-        fb += (" Compared with your first attempt, newly matched keywords: " + "; ".join(gained) + "."
-               if gained else " Compared with your first attempt, no new rubric keywords matched; "
-               "explain explicitly what the new fact changed (or why it changes nothing).")
+    fb = ("Demo feedback (scripted: this demo cannot assess your reasoning, and nothing here evaluates it). "
+          "A live tutor would respond to the specific facts you used. For now, check your own answer: which facts "
+          "from the scenario does it rest on, which parts are your inference, and what would you want to find out next?")
+    if phase in ("revision", "review"):
+        fb += (" Compare this revision with your first attempt: what changed, and which new fact or piece of "
+               "evidence made you change it?")
     anchor = ps[(ctx.get("turn", 0)) % len(ps)]
     blocks = [_coach(fb, "feedback"), _quote(anchor, "feedback"),
               {"type": "interpretation", "purpose": "feedback", "text": (
-                  "The passage above is one of the texts selected for this exercise. A question to "
-                  "bring back to your own answer: does it say where the change comes from (inside "
-                  "the situation, outside it, or both) and how those are connected? This scripted "
-                  "demo cannot judge whether the passage supports your specific answer."),
+                  "The passage above is one of the texts selected for this exercise. A question to bring back to "
+                  "your own answer: what does this passage say that bears on your explanation, and what does it leave "
+                  "unsaid? This scripted demo cannot judge whether the passage supports your specific answer."),
                "citations": [_cite(anchor)]}]
     snippet = re.sub(r"\s+", " ", text).strip()[:140]
     if phase == "attempt":
@@ -188,7 +176,7 @@ def _hint(req):
     n = req.context.get("hints_used", 1)
     hints = [
         "Hint 1: Reread the scenario and list, in one column, only what it states. In another, list what you are guessing. Which column is your explanation built from?",
-        "Hint 2: Look for two parties or forces in the scenario whose aims pull in different directions. How might each affect the other — and what outside condition changed in the meantime?",
+        "Hint 2: Which relationships does the scenario describe — who depends on whom, and who affects whom? What has changed over time, and which records would you want to check?",
         "Hint 3: I will not narrow it further without giving the answer away. Write your best attempt, mark what you are unsure about, and I will respond to that.",
     ]
     return {"blocks": [_coach(hints[min(n, 3) - 1], "hint")]}
@@ -207,30 +195,21 @@ def _analysis(req):
     ctx, ps = req.context, req.passages
     blocks = [_quote(ps[0], "analysis"),
               {"type": "interpretation", "purpose": "analysis", "text": (
-                  "Demo analysis (one defensible reading, not THE answer): start from what the "
-                  "scenario states; identify the parties or forces whose aims differ and how each "
-                  "affects the other; separate those internal relations from outside conditions "
-                  "and ask how the outside conditions work through them; then say what new facts "
-                  "would change which issue is most important. Other readings that fit the facts "
-                  "are legitimate if you can show the evidence for them."), "citations": [_cite(ps[0])]},
-              _coach("Compare this reading with your own and note where you differ and why.", "analysis")]
+                  "Demo analysis (a scripted placeholder: one defensible approach, not THE answer): start from what the "
+                  "scenario states; note which claims rest on stated facts and which on inference; trace how the parts "
+                  "are related and how the situation has changed; weigh more than one explanation and say what evidence "
+                  "would distinguish them; and say what you still do not know. Other readings that fit the facts are "
+                  "legitimate if you can show the evidence for them."), "citations": [_cite(ps[0])]},
+              _coach("Compare this approach with your own and note where you differ and why.", "analysis")]
     return {"blocks": blocks}
 
 
 def _reflection(req):
     ctx, ps = req.context, req.passages
-    attempts = ctx.get("attempts", [])
-    union = {k: False for k, _ in RUBRIC}
-    for t in attempts:
-        for k, v in analyse(t).items():
-            union[k] = union[k] or v
-    shown = [LABEL[k] for k, _ in RUBRIC if union[k]]
-    todo = [LABEL[k] for k, _ in RUBRIC if not union[k]]
-    text = (f"Session reflection (demo; keyword-based, not a measure of ability). You made "
-            f"{len(attempts)} attempt(s) and used {ctx.get('hints_used', 0)} hint(s). "
-            + ("Keyword matches somewhere in your answers: " + "; ".join(shown) + ". " if shown else "")
-            + ("No keyword match for: " + "; ".join(todo) + ". " if todo else "")
-            + RUBRIC_NOTE)
+    n = len(ctx.get("attempts", []))
+    text = (f"Session reflection (demo; scripted, not an assessment). You made {n} attempt(s) and used "
+            f"{ctx.get('hints_used', 0)} hint(s). Look back at your attempts: where did you separate stated facts from "
+            "inference? Did a new fact change your explanation, and why? What would you check next? " + RUBRIC_NOTE)
     return {"blocks": [_coach(text, "reflection"), _quote(ps[0], "reflection"),
                        _coach("One thing to try next: pick a single claim from your last answer and "
                               "write what evidence would change your mind.", "reflection")]}

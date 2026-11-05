@@ -127,7 +127,8 @@
           "change_development_history"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C1b",
@@ -198,7 +199,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": true
     },
     {
       "id": "C2a",
@@ -265,7 +267,8 @@
           "concrete_conditions"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": true
     },
     {
       "id": "C2b",
@@ -322,7 +325,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C3a",
@@ -377,7 +381,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": true
     },
     {
       "id": "C3b",
@@ -427,7 +432,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C3c",
@@ -469,7 +475,8 @@
           "contradiction_and_lookalikes"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C3d",
@@ -511,7 +518,8 @@
           "contradiction_and_lookalikes"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C4a",
@@ -565,7 +573,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "C4b",
@@ -624,7 +633,8 @@
           "evidence_for_opposed_aspects"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "K1",
@@ -666,7 +676,8 @@
           "materialism_idealism"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "K2",
@@ -714,7 +725,8 @@
           "author_differences"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     },
     {
       "id": "K3",
@@ -765,8 +777,10 @@
           "dialectical_vs_metaphysical_method"
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
-      }
+      },
+      "first_diagnostic": false
     }
   ],
-  "_review_note": "Drafted by an AI model as a starting point. Every case, and every expected behaviour, needs the OWNER's review and edits (owner_review: pending). The pairing of 'better' and 'worse' reflects the drafter's judgement and may be wrong."
+  "_review_note": "Drafted by an AI model as a starting point. Every case, and every expected behaviour, needs the OWNER's review and edits (owner_review: pending). The pairing of 'better' and 'worse' reflects the drafter's judgement and may be wrong.",
+  "_first_diagnostic_note": "The first live diagnostic is only C2a (impressive terminology without explaining the situation), C1b (plain-language relational and developmental analysis) and C3a (a contradiction claimed that the evidence does not yet justify). See docs/dialectical/DIAGNOSTIC_PACKET.md."
 }

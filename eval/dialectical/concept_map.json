@@ -2,13 +2,14 @@
   "_label": "APP-CREATED CONCEPT MAP SKELETON. It contains NO source passages and makes NO claim about what any author says or means. Support can only come from the owner's APPROVED library, found with `python tools/dm_eval.py probe` and then confirmed by the owner by hand in a local, git-ignored file. Until a concept is confirmed, the tutor must treat it as 'not established by the selected library'.",
   "version": 1,
   "support_policy": {
-    "confirmation_file": "data/concept_confirmations.json (local, git-ignored, written by the OWNER)",
+    "confirmation_file": "data/concept_confirmations.json (local, git-ignored)",
     "statuses": {
-      "unsupported": "nothing confirmed yet (default; this repository ships only this)",
-      "confirmed": "owner confirmed >=1 passage from an approved document supports an author's usage",
-      "not_addressed": "owner reviewed candidates and the approved library does not address this concept"
+      "unsupported": "nothing reviewed yet (the only state this repository ships)",
+      "supported": "reviewed passages from approved primary documents support an author's usage (each with a reviewer note)",
+      "not_found_in_reviewed": "nothing found in the passages actually reviewed (requires 'reviewed_scope'); this is NOT the same as 'the library does not address it'",
+      "needs_investigation": "candidates are unclear or the search vocabulary is uncertain; do not conclude anything"
     },
-    "rule": "The tutor may state what texts say about a concept only through confirmed passages; otherwise it must say the selected library does not establish it."
+    "rule": "The tutor may state what texts say about a concept only through reviewed passages; otherwise it should say 'the supplied passages do not establish this', not 'the library does not address it'. AI-assisted passage selection is not independent philosophical validation."
   },
   "concepts": [
     {

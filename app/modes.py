@@ -20,11 +20,12 @@ MODES = {
     "dialectical": {
         "title": "Dialectical reasoning exercise",
         "seed_query": "contradiction tension internal external conditions change development relationship aspects",
-        "objective": ("Practise explaining change in a situation by tracing relationships, "
-                      "tensions and conditions — using concepts taken from the selected texts, "
-                      "not a fixed formula."),
-        "guidance": ("Focus: how change arises from relationships and tensions inside a situation "
-                     "and from outside conditions, and how the main issue can shift when facts change."),
+        "objective": ("Practise explaining a situation from its concrete facts: how its parts are related, how it "
+                      "has changed, and what evidence supports each claim — using only concepts the selected "
+                      "texts supply, attributed to their authors, not a fixed formula."),
+        "guidance": ("Focus: investigate the concrete facts, relationships and history of the case. Use a concept only "
+                     "in the sense the supplied passages give it, attributed to its author; if the passages do not "
+                     "establish a concept, say so."),
         "scenarios": {
             "beginner": ("A small neighbourhood bakery has two teams. The bakers want a slow, careful "
                          "rise; the counter staff want fast stock for the morning queue. Last month "

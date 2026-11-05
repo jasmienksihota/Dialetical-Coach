@@ -24,7 +24,7 @@ Metadata you know (title, author, date, edition/translation) can be added at imp
 blank fields stay blank. For PDFs you may set a *printed page offset* (printed = PDF page + offset);
 it is never guessed. Notes exported from NotebookLM go in as **secondary study notes**.
 
-**Known limits:** footnotes, tables and multi-column reading order are whatever the PDF's text layer gives;
+**Known limits:** the app does not distinguish an author's own text from an editor's or translator's notes inside a document (only primary vs secondary-notes documents are distinguished), and recorded author/date/edition are passed to the model exactly as entered ('not recorded' when blank); footnotes, tables and multi-column reading order are whatever the PDF's text layer gives;
 chunks never cross a PDF page break, so a phrase straddling it is split between two passages; for TXT/MD, a
 passage's line range covers the lines it was built from (a long run without blank lines is split by line, so
 ranges stay tight). Check any document with `python tools/inspect_import.py file.pdf --probe 12:"phrase"` and

@@ -28,3 +28,8 @@ workflow is subject-agnostic. All "dialectical" content comes from three app-aut
 
 Not found / not established: whether the owner's real texts define or discuss any of these concepts; how any real
 model behaves on the proposed prompts.
+
+## Status since this audit (branch `claude/dm-concepts-eval`)
+F1: objective/guidance text neutralised (seed_query unchanged; fixture A still echoes the old framing). F5: keyword feedback removed from the learner-facing demo.
+F6: author/date/edition ("not recorded" when unknown) are now sent with every passage; the app still cannot tell an author's text from an editor's or
+translator's note inside a document. F2, F3, F4, F7, F8: open. None of this shows the tutor understands dialectical materialism.

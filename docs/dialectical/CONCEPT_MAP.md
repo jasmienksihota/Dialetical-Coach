@@ -3,7 +3,7 @@
 `eval/dialectical/concept_map.json` is an **app-created skeleton**. It contains **no source passages and no claims
 about what any author says.** It lists the concepts the learning goal needs and, for each, the *question to ask the
 library*, search-term variants for finding candidate passages, and a neutral framing question the tutor may pose.
-Passage-level support can only come from documents *you* approved, confirmed *by you*.
+Passage-level support can only come from documents the owner approved, and only after a reviewer has read the passages in context. AI-assisted selection is not independent philosophical validation.
 
 Passage support is currently **none** for every concept (status `unsupported`). Nothing was added, downloaded or
 approved to change that.
@@ -24,20 +24,20 @@ approved to change that.
 1. **Materialism / idealism** is one question (what is primary, per each author).
 2. **Dialectical / metaphysical method** is a different question (how things are to be studied, per each author's *own* usage; usages may differ).
 3. **Cartesian mind–body dualism** is a third question (how mind and body relate in one individual). Whether the library addresses it at all is itself a finding. If it does not, the tutor must say the library does not establish it — it must not fill the gap with outside knowledge presented as a source claim.
-4. **Contradiction vs look-alikes.** The app's *teaching contrasts* (mere disagreement, practical tradeoff, logical inconsistency) are used to ask "what evidence would distinguish these here?". They are **not** claims about the authors; the tutor may say the texts draw a contrast only if a confirmed passage does.
+4. **Contradiction vs look-alikes.** The app's *teaching contrasts* (mere disagreement, practical tradeoff, logical inconsistency) are used to ask "what evidence would distinguish these here?". They are **not** claims about the authors; the tutor may say the texts draw a contrast only if a reviewed passage does.
 
-## How support gets attached (all local, all by you)
+## How support gets attached (local, reviewer-driven; the owner is not asked to annotate)
 ```bash
-python tools/dm_eval.py probe --out data/concept_review.sheet.md     # read-only candidates from APPROVED docs
-# read the passages in context; then YOU write data/concept_confirmations.json:
-#   {"concepts": {"materialism_idealism": {"status": "confirmed", "reviewed": "2026-11-05",
-#       "passages": [{"chunk_id": "<id>", "author": "<name>", "note": "what it shows, in your words"}]},
-#     "cartesian_mind_body_dualism": {"status": "not_addressed", "reviewed": "2026-11-05"}}}
-python tools/dm_eval.py readiness                                        # which cases are now traceable
+python tools/dm_eval.py probe --out <file outside the repo>      # read-only candidates from APPROVED primary docs
+# a reviewer reads the passages in context, then writes data/concept_confirmations.json (local, git-ignored):
+#   {"concepts": {"concrete_conditions": {"status": "supported", "reviewed": "2026-11-05",
+#       "passages": [{"chunk_id": "<id>", "author": "<as recorded>", "note": "what it shows, in the reviewer's words"}]},
+#     "evidence_for_opposed_aspects": {"status": "not_found_in_reviewed", "reviewed_scope": "<what was actually reviewed>"}}}
+python tools/dm_eval.py readiness --diagnostic                    # which of the 3 diagnostic cases are traceable
 ```
-`probe` opens the database **read-only**, looks only at approved primary documents, and never approves, edits or
-imports anything. A candidate is a word match, not support. `confirmed` requires passage IDs that exist, belong to
-approved primary documents, and carry your own note. `not_addressed` records that you reviewed and the library does
-not cover the concept (which is what the tutor must then say).
-
-Both files with excerpts/confirmations live under `data/` (git-ignored).
+Statuses: **`supported`** (reviewed passages from approved primary documents, each with a reviewer note), **`not_found_in_reviewed`**
+(nothing found in what was actually reviewed; needs `reviewed_scope`; this is *not* the stronger claim that the library does not address the
+concept, since a failed word search can simply mean different wording), **`needs_investigation`** (unclear; conclude nothing).
+`probe` opens the database read-only, looks only at approved primary documents, and never approves, edits or imports anything. A candidate is a
+word match, not support. Excerpts and confirmations stay under `data/` (git-ignored) and are not shared without the owner's permission.
+The first diagnostic needs only five concepts: see `DIAGNOSTIC_PACKET.md` and `LOCAL_PROBE_INSTRUCTIONS.md`.
