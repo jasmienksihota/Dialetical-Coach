@@ -181,7 +181,7 @@ function docMeta(d) {
 function renderDocs() {
   const list = $('#doc-list');
   $('#lib-count').textContent = `(${state.docs.length} documents, ${state.docs.filter(d => d.approved).length} approved)`;
-  if (!state.docs.length) { list.replaceChildren(h('p', { class: 'muted' }, 'No documents yet. Import a file, or load the synthetic demo documents.')); return; }
+  if (!state.docs.length) { list.replaceChildren(h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted' }, 'No documents yet. Import a file, or load the synthetic demo documents.'))); return; }
   list.replaceChildren(...state.docs.map(docCard));
 }
 
@@ -318,7 +318,7 @@ async function loadConvs() {
     onclick: guard(() => openConversation(c.id)) },
     h('span', { class: 't' }, c.title),
     h('span', { class: 'tiny' }, `${c.mode} · ${c.provider === 'demo' ? 'demo' : 'live'} · ${c.message_count} msgs`))));
-  if (!state.convs.length) list.replaceChildren(h('p', { class: 'muted small' }, 'No saved sessions yet.'));
+  if (!state.convs.length) list.replaceChildren(h('div', { class: 'empty' }, h('span', { class: 'star', 'aria-hidden': 'true' }), h('p', { class: 'muted small' }, 'No saved sessions yet.')));
 }
 
 async function openConversation(id) {
