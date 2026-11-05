@@ -89,22 +89,33 @@ def extract_pdf(data: bytes):
     except Exception as exc:  # noqa: BLE001
         raise IngestError(f"Could not read this PDF ({type(exc).__name__}).") from exc
 
-    paras: list[Para] = []
     warnings: list[str] = []
-    empty_pages: list[int] = []
-    pages_with_text = 0
+    raw_pages: list[str] = []
     for number, page in enumerate(pages, start=1):
         try:
             text = page.extract_text() or ""
         except Exception as exc:  # noqa: BLE001
             warnings.append(f"Page {number}: text extraction failed ({type(exc).__name__}).")
             text = ""
-        text = text.replace("\x00", "").replace("\r", "")
+        raw_pages.append(text.replace("\x00", "").replace("\r", ""))
+
+    raw_pages, removed = _strip_running_lines(raw_pages)
+    if removed:
+        shown = "; ".join(f"“{t[:50]}”" for t in removed[:3])
+        warnings.append(f"Note: removed {len(removed)} repeated header/footer line pattern(s) at page edges "
+                        f"from the indexed text (e.g. {shown}). Check “View extracted text” if something "
+                        "important is missing.")
+
+    paras: list[Para] = []
+    empty_pages: list[int] = []
+    pages_with_text = 0
+    for number, text in enumerate(raw_pages, start=1):
         if _nonspace(text) < MIN_PAGE_CHARS:
             empty_pages.append(number)
         else:
             pages_with_text += 1
         for block in re.split(r"\n\s*\n", text):
+            block = _HYPHEN_BREAK.sub("", block)          # "evi-\ndence" -> "evidence"
             block = re.sub(r"\s*\n\s*", " ", block).strip()
             if _nonspace(block) >= MIN_PARA_CHARS:
                 paras.append(Para(text=block, page=number))
@@ -119,11 +130,58 @@ def extract_pdf(data: bytes):
     elif pages_with_text < total:
         shown = ", ".join(str(p) for p in empty_pages[:20])
         more = " …" if len(empty_pages) > 20 else ""
-        warnings.insert(0, (
-            f"Only {pages_with_text} of {total} pages contain extractable text "
-            f"(no text on physical page(s): {shown}{more}). Those pages are not indexed; "
-            "the document may be partly scanned."))
+        share = len(empty_pages) / total
+        if share >= 0.2 and len(empty_pages) >= 2:
+            warnings.insert(0, (
+                f"Only {pages_with_text} of {total} pages contain extractable text "
+                f"(little or no text on physical page(s): {shown}{more}). Those pages are not indexed; "
+                "the document may be partly scanned."))
+        else:   # a few blank / near-empty pages are normal (chapter ends, plates); disclose, don't alarm
+            warnings.insert(0, (
+                f"Note: {len(empty_pages)} of {total} pages have little or no extractable text "
+                f"(physical page(s): {shown}{more}); probably blank or image-only."))
     return paras, total, warnings, pages_with_text
+
+
+_HYPHEN_BREAK = re.compile(r"(?<=[a-z])-[ \t]*\n[ \t]*(?=[a-z])")
+
+
+def _edge_key(line: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"\d+", "#", line.lower())).strip()
+
+
+def _strip_running_lines(pages: list[str]) -> tuple[list[str], list[str]]:
+    """Remove running headers / footers / page numbers: lines that recur at the top or
+    bottom edge (first/last two non-empty lines) of at least 40% of the text pages."""
+    if sum(1 for p in pages if _nonspace(p) >= MIN_PAGE_CHARS) < 4:
+        return pages, []
+    edges: list[set[str]] = []
+    for text in pages:
+        lines = [ln for ln in text.split("\n") if ln.strip()]
+        edge = lines[:2] + lines[-2:] if len(lines) > 4 else lines[:1] + lines[-1:]
+        edges.append({_edge_key(ln) for ln in edge if len(ln.strip()) < 120})
+    counts: dict[str, int] = {}
+    for e in edges:
+        for k in e:
+            counts[k] = counts.get(k, 0) + 1
+    need = max(3, int(0.4 * len(pages) + 0.999))
+    repeated = {k for k, v in counts.items() if v >= need and k}
+    if not repeated:
+        return pages, []
+    out, examples = [], {}
+    for text in pages:
+        lines = text.split("\n")
+        idx = [i for i, ln in enumerate(lines) if ln.strip()]
+        cand = set(idx[:2] + idx[-2:]) if len(idx) > 4 else set(idx[:1] + idx[-1:])
+        keep = []
+        for i, ln in enumerate(lines):
+            k = _edge_key(ln)
+            if i in cand and k in repeated:
+                examples.setdefault(k, ln.strip())
+                continue
+            keep.append(ln)
+        out.append("\n".join(keep))
+    return out, list(examples.values())
 
 
 _HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
@@ -137,30 +195,60 @@ def extract_text(data: bytes, file_type: str):
     try:
         text = data.decode("utf-8-sig")
     except UnicodeDecodeError:
-        text = data.decode("utf-8", errors="replace")
-        warnings.append("File is not valid UTF-8; undecodable bytes were replaced.")
+        try:
+            text = data.decode("cp1252")
+            warnings.append("Note: file is not UTF-8; it was decoded as Windows-1252. Check quotes and "
+                            "accented letters in “View extracted text”.")
+        except UnicodeDecodeError:
+            text = data.decode("utf-8", errors="replace")
+            warnings.append("File is not valid UTF-8 or Windows-1252; undecodable bytes were replaced.")
     lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+
+    first = 0
+    if file_type == "md" and lines and lines[0].strip() == "---":       # YAML front matter
+        for j in range(1, min(len(lines), 60)):
+            if lines[j].strip() in ("---", "..."):
+                first = j + 1
+                break
 
     paras: list[Para] = []
     trail: list[tuple[int, str]] = []
-    buf: list[str] = []
-    start = 0
+    buf: list[tuple[int, str]] = []          # (1-based line number, text)
 
     def section() -> str | None:
         return " > ".join(t for _, t in trail) or None
 
-    def flush(end_line: int):
+    def emit(group: list[tuple[int, str]]):
+        body = " ".join(t.strip() for _, t in group).strip()
+        if _nonspace(body) >= MIN_PARA_CHARS:
+            paras.append(Para(body, None, group[0][0], group[-1][0], section()))
+
+    def flush():
         nonlocal buf
         if buf:
-            body = " ".join(s.strip() for s in buf).strip()
-            if _nonspace(body) >= MIN_PARA_CHARS:
-                paras.append(Para(body, None, start, end_line, section()))
+            total = sum(len(t) + 1 for _, t in buf)
+            if total > HARD_CHUNK and len(buf) > 1:
+                # one long block without blank lines (scraped / single-newline text): keep each
+                # piece tied to its OWN lines instead of the whole block's range
+                group, size = [], 0
+                for item in buf:
+                    if group and size + len(item[1]) + 1 > TARGET_CHUNK:
+                        emit(group)
+                        group, size = [], 0
+                    group.append(item)
+                    size += len(item[1]) + 1
+                if group:
+                    emit(group)
+            else:
+                emit(buf)
         buf = []
 
     for i, line in enumerate(lines, start=1):
+        if i <= first:
+            continue
         m = _HEADING.match(line) if file_type == "md" else None
         if m:
-            flush(i - 1)
+            flush()
             level, title = len(m.group(1)), m.group(2).strip()
             while trail and trail[-1][0] >= level:
                 trail.pop()
@@ -168,12 +256,10 @@ def extract_text(data: bytes, file_type: str):
                 trail.append((level, title))
             continue
         if not line.strip():
-            flush(i - 1)
+            flush()
             continue
-        if not buf:
-            start = i
-        buf.append(line)
-    flush(len(lines))
+        buf.append((i, line))
+    flush()
     return paras, warnings
 
 
@@ -272,7 +358,16 @@ def ingest_file(db: Database, settings: Settings, filename: str, data: bytes, *,
             warnings.insert(0, "No usable text was found in this file.")
     chunks = chunk_paragraphs(paras)
     char_count = sum(len(c.text) for c in chunks)
-    status = "empty" if not chunks else ("warning" if warnings else "ok")
+    if chunks:
+        body = "".join(c.text for c in chunks)
+        visible = re.sub(r"\s", "", body)
+        letters = sum(ch.isalpha() for ch in visible)
+        if len(visible) >= 200 and (letters / len(visible) < 0.55 or body.count("\ufffd") / len(visible) > 0.01):
+            warnings.append("Much of the extracted text is not letters or contains replacement characters "
+                            "(tables, OCR noise or a bad encoding). Search and citations may be unreliable; "
+                            "check “View extracted text”.")
+    status = ("empty" if not chunks
+              else "warning" if any(not w.startswith("Note:") for w in warnings) else "ok")
 
     settings.originals_dir.mkdir(parents=True, exist_ok=True)
     stored_name = f"{sha}{ext}"

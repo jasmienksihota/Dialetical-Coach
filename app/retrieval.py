@@ -194,8 +194,10 @@ class LexicalRetriever(Retriever):
         rows = [r for r in conn.execute(
             f"SELECT id, text FROM chunks WHERE doc_id IN ({marks})", doc_ids).fetchall()
             if r["id"] not in exclude]
-        prefixes = [_prefix(t) for t in terms]
-        tokenized = [(r["id"], re.findall(r"[\w'-]+", r["text"].lower())) for r in rows]
+        # split hyphenated terms like the FTS5 tokenizer does ("marker-77" -> marker, 77)
+        parts = [p for t in terms for p in re.split(r"[-']+", t) if p]
+        prefixes = [_prefix(t) for t in dict.fromkeys(parts)]
+        tokenized = [(r["id"], re.findall(r"\w+", r["text"].lower())) for r in rows]
         n = max(1, len(tokenized))
         df = {p: sum(1 for _, ws in tokenized if any(w.startswith(p) for w in ws))
               for p in prefixes}

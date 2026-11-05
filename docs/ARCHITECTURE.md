@@ -43,3 +43,13 @@ redacts the key. The mock provider is deterministic and labeled.
 
 **Swapping retrieval.** Implement `retrieval.Retriever.search(...)` (respecting `resolve_scope`) and
 return it from `get_retriever`.
+
+## Additions after the first review
+- **Scope transparency:** `retrieval.explain_scope` (and `POST /api/scope/resolve`) returns the resolved document
+  list with reasons; every assistant turn records `report.scope` (documents in scope that turn).
+- **Uncited-claim guard** (`citations.detect_uncited_source_claim`): pattern checks for source claims in
+  coaching/fiction/limits blocks; fiction may not cite. Heuristic, not proof of anything.
+- **Live stages** (`livecontrol.LiveGuard`): `live_calls.status/structured/citations_ok` keep "API reachable",
+  "usable structured output" and "citation-validated tutoring turn" separate.
+- **Follow-ups** (`followup.py`): short messages are expanded with the last *substantive* question; "another/different"
+  excludes passages already used; everything stays inside `resolve_scope`.

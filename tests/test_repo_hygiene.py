@@ -52,3 +52,8 @@ def test_no_api_key_shaped_strings_in_tracked_files():
         if pat.search(p.read_text(errors="ignore")):
             hits.append(f)
     assert hits == []
+
+
+def test_alternative_data_folders_are_ignored_too():
+    for p in ("data-acceptance/tutor.db", "data-acceptance/originals/x.pdf", "data-backup/tutor.db"):
+        assert git("check-ignore", "-q", p).returncode == 0, p
