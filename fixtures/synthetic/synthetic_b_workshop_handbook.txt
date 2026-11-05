@@ -1,0 +1,32 @@
+SYNTHETIC TEST FIXTURE B - "Handbook of the Fictional Lantern Workshop"
+
+SYNTHETIC FIXTURE: invented text for software testing and demos. It is not a real
+author, not a real publication, and not a Marxist-Leninist source.
+
+Chapter 1. Investigate before you decide
+
+A member of the lantern workshop who has not investigated has no right to speak about
+what the workshop should do. The handbook insists that facts be gathered first: who
+makes the lanterns, which steps are slow, and what the customers actually say. An
+observation is what was seen or heard; an inference is what the investigator concludes
+from it, and the two must be kept apart in every report.
+
+Chapter 2. Correcting mistakes
+
+When the workshop shipped lanterns with cracked glass, the handbook records that the
+first explanation (careless workers) was dropped after the facts showed a faulty crate
+design. The handbook says a mistake is useful when it is examined openly and the
+explanation is revised in light of the evidence.
+
+Chapter 3. Apprentices and delegation
+
+An experienced lantern maker should teach an apprentice by letting the apprentice try a
+task, then reviewing the result together. Delegation means handing over a real task with
+clear limits and then assessing the outcome fairly, using the same standard for every
+apprentice. The handbook calls this the cheapest way to grow capable makers.
+
+Chapter 4. Choosing what to do first
+
+The handbook says that when many problems press at once, the workshop should name the
+main constraint, the one problem whose solution most loosens the others, and revisit that
+choice whenever the facts change.
