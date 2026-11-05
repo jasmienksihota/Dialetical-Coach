@@ -1,6 +1,7 @@
 # First diagnostic: three cases (provisional evidence packet)
 
-**Status: template prepared; NO supporting passages yet; NOTHING reviewed.** The scenarios and learner responses are **INVENTED**
+**Status of THIS tracked template: NO supporting passages; NOTHING reviewed by Jasmien or any human.** (It is the template for the owner's imported library.)
+A **populated reference-text version exists locally** at `docs/dialectical/local/DIAGNOSTIC_PACKET.local.md` (git-ignored because it contains source excerpts): AI-assisted and UNVALIDATED, built from 15 public texts Jasmien authorized by URL (not from her imported files). The scenarios and learner responses are **INVENTED**
 (written by the app's developer). Passages can only come from documents Jasmien has approved (or reference texts she has authorized for review), inspected under permissions she has actually granted
 (`LOCAL_PROBE_INSTRUCTIONS.md`). Each filled entry must record the reviewer (`ai_assisted_unvalidated`, `owner_reviewed` or both) and exact locations; a term match alone never makes a passage `supported`. A filled packet contains source excerpts and stays in a git-ignored local file (`*.local.md`). Nothing below says what any author says. A live run needs separate spending authorization and has not happened.
 
