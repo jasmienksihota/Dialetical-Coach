@@ -575,7 +575,8 @@
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
       "first_diagnostic": false,
-      "provisional_note": "Premise not established by the sources reviewed: whether (and how) the texts contrast a tradeoff / a logical inconsistency with a contradiction is `needs_investigation`. Revise after review; do not rely on this case's expectations yet."
+      "provisional_note": "Premise not established by the sources reviewed: whether (and how) the texts contrast a tradeoff / a logical inconsistency with a contradiction is `needs_investigation`. Revise after review; do not rely on this case's expectations yet.",
+      "limitation_note": "Recorded for later, NOT revised: scenario S2b says the meeting is two hours and two volunteers are scheduled 19 hours of shifts, but does not state that meeting hours count toward the same 20-hour cap on the same basis as shifts. The two rules conflict only if they do. Keep this case provisional until that is made explicit."
     },
     {
       "id": "C4a",
