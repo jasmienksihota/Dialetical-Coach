@@ -18,6 +18,7 @@ word search is NOT proof a concept is absent). 'needs_investigation' is not reso
 Confirmation file (local; git-ignored under data/):
   {"concepts": {"contradiction_and_lookalikes": {
        "status": "supported",            # or "not_found_in_reviewed" (+ "reviewed_scope") or "needs_investigation"
+       "reviewer": "ai_assisted_unvalidated",   # or owner_reviewed / ai_assisted_then_owner_reviewed
        "passages": [{"chunk_id": "...", "author": "...", "note": "reviewer's words on what it shows"}],
        "reviewed": "2026-11-05"}}}
 """
@@ -38,6 +39,7 @@ from app.retrieval import LexicalRetriever, Scope  # noqa: E402
 
 EVAL = ROOT / "eval" / "dialectical"
 STATUSES = ("supported", "not_found_in_reviewed", "needs_investigation")
+REVIEWERS = ("ai_assisted_unvalidated", "owner_reviewed", "ai_assisted_then_owner_reviewed")
 RESOLVED = ("supported", "not_found_in_reviewed")
 
 
@@ -114,6 +116,10 @@ def validate_confirmations(conn, concept_map: dict, conf: dict) -> tuple[dict, l
             problems.append(f"{cid}: not a concept in concept_map.json")
             continue
         st = entry.get("status")
+        if st in ("supported", "not_found_in_reviewed") and entry.get("reviewer") not in REVIEWERS:
+            problems.append(f"{cid}: record who reviewed it: 'reviewer' must be one of {', '.join(REVIEWERS)} "
+                            "(AI-assisted review is not the owner's review and is not independent validation)")
+            continue
         if st == "needs_investigation":
             status[cid] = "needs_investigation"
         elif st == "not_found_in_reviewed":

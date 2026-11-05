@@ -1,8 +1,8 @@
 # First diagnostic: three cases (provisional evidence packet)
 
 **Status: template prepared; NO supporting passages yet; NOTHING reviewed.** The scenarios and learner responses are **INVENTED**
-(written by the app's developer). Passages can only come from the owner's approved library, inspected locally
-(`LOCAL_PROBE_INSTRUCTIONS.md`). Nothing below says what any author says. A live run needs separate spending authorization and has not happened.
+(written by the app's developer). Passages can only come from documents Jasmien has approved (or reference texts she has authorized for review), inspected under permissions she has actually granted
+(`LOCAL_PROBE_INSTRUCTIONS.md`). Each filled entry must record the reviewer (`ai_assisted_unvalidated`, `owner_reviewed` or both) and exact locations; a term match alone never makes a passage `supported`. A filled packet contains source excerpts and stays in a git-ignored local file (`*.local.md`). Nothing below says what any author says. A live run needs separate spending authorization and has not happened.
 
 | Case | Purpose | Anchor concepts | Supporting passages | Source-level interpretation | Reviewed? |
 |---|---|---|---|---|---|

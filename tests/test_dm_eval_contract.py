@@ -190,14 +190,14 @@ def test_readiness_accepts_only_valid_confirmations(env):
     inject = chunk_ids(env, "inject")[0]                                       # unapproved document
     conn = dm.open_readonly(env.settings.data_dir)
     conf = {"concepts": {
-        "concrete_conditions": {"status": "supported", "passages": [{"chunk_id": ok, "author": "synthetic", "note": "reviewer words"}]},
-        "relations_interdependence": {"status": "supported", "passages": [{"chunk_id": ok, "note": "reviewer words"}]},
-        "change_development_history": {"status": "not_found_in_reviewed", "reviewed_scope": "synthetic mill notes only"},
-        "evidence_for_opposed_aspects": {"status": "supported", "passages": [{"chunk_id": inject, "note": "x"}]},
-        "materialism_idealism": {"status": "supported", "passages": []},
-        "dialectical_vs_metaphysical_method": {"status": "supported", "passages": [{"chunk_id": "nope-0001", "note": "x"}]},
-        "author_differences": {"status": "supported", "passages": [{"chunk_id": ok}]},
-        "contradiction_and_lookalikes": {"status": "not_found_in_reviewed"},                  # no reviewed_scope
+        "concrete_conditions": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": [{"chunk_id": ok, "author": "synthetic", "note": "reviewer words"}]},
+        "relations_interdependence": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": [{"chunk_id": ok, "note": "reviewer words"}]},
+        "change_development_history": {"reviewer": "ai_assisted_unvalidated", "status": "not_found_in_reviewed", "reviewed_scope": "synthetic mill notes only"},
+        "evidence_for_opposed_aspects": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": [{"chunk_id": inject, "note": "x"}]},
+        "materialism_idealism": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": []},
+        "dialectical_vs_metaphysical_method": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": [{"chunk_id": "nope-0001", "note": "x"}]},
+        "author_differences": {"reviewer": "ai_assisted_unvalidated", "status": "supported", "passages": [{"chunk_id": ok}]},
+        "contradiction_and_lookalikes": {"reviewer": "owner_reviewed", "status": "not_found_in_reviewed"},                  # no reviewed_scope
         "concrete_analysis_x": {"status": "supported"},
         "cartesian_mind_body_dualism": {"status": "needs_investigation"},
     }}
@@ -217,6 +217,20 @@ def test_readiness_accepts_only_valid_confirmations(env):
     assert rows["C1a"]["ready"] and rows["C1a"]["limits_only"] == ["change_development_history"]   # limits-only, flagged
     assert not rows["C1b"]["ready"]                                                # still needs the invalid evidence concept
     assert not rows["K3"]["ready"]
+
+
+def test_every_resolved_status_must_record_who_reviewed_it(env):
+    ok = chunk_ids(env, "mill")[0]
+    conn = dm.open_readonly(env.settings.data_dir)
+    base = {"status": "supported", "passages": [{"chunk_id": ok, "note": "n"}]}
+    for entry in (base, {**base, "reviewer": "claude"}, {**base, "reviewer": "ai_assisted"}):
+        st, problems = dm.validate_confirmations(conn, CMAP, {"concepts": {"concrete_conditions": entry}})
+        assert st["concrete_conditions"] == "unresolved" and "who reviewed it" in problems[0]
+    for who in dm.REVIEWERS:
+        st, _ = dm.validate_confirmations(conn, CMAP, {"concepts": {"concrete_conditions": {**base, "reviewer": who}}})
+        assert st["concrete_conditions"] == "supported"
+    assert set(dm.REVIEWERS) == {"ai_assisted_unvalidated", "owner_reviewed", "ai_assisted_then_owner_reviewed"}
+    assert "Verify authorization" in " ".join((ROOT / "docs" / "dialectical" / "LOCAL_PROBE_INSTRUCTIONS.md").read_text().split())
 
 
 def test_a_failed_search_alone_never_becomes_a_strong_claim(env):
@@ -246,7 +260,7 @@ def test_secondary_notes_cannot_confirm_a_concept(env):
     env.client.post(f"/api/documents/{env.ids['notes']}/approval", json={"approved": True})
     sec = chunk_ids(env, "notes")[0]
     conn = dm.open_readonly(env.settings.data_dir)
-    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {"concrete_conditions": {"status": "supported",
+    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {"concrete_conditions": {"status": "supported", "reviewer": "owner_reviewed",
                        "passages": [{"chunk_id": sec, "note": "x"}]}}})
     assert rep["concept_status"]["concrete_conditions"] == "unresolved" and "secondary notes" in " ".join(rep["problems"])
 
