@@ -31,3 +31,19 @@ Thumbs.db
 .idea/
 .vscode/
 test-artifacts/
+
+# Safety net for real source documents accidentally dropped inside the repo.
+# (Synthetic test fixtures are explicitly re-included below.)
+*.pdf
+*.epub
+*.docx
+*.doc
+*.rtf
+library/
+documents/
+my-documents/
+sources/
+imports/
+notes-export/
+!fixtures/synthetic/
+!fixtures/synthetic/*.pdf

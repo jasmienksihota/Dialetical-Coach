@@ -112,9 +112,13 @@ def _exercise_system(ex: dict, scope_desc: str, key: str, extra: str = "") -> st
         lines.append("OBJECTIVE: " + ex["objective"])
     if ex.get("complication"):
         lines.append("COMPLICATION ALREADY INTRODUCED: " + ex["complication"])
+    if ex.get("attempts"):
+        lines.append("LEARNER'S ATTEMPTS SO FAR (their own words; not source material; truncated): "
+                     + " || ".join(f"#{a['n']} ({a['phase']}): {' '.join(a['text'].split())[:500]}"
+                                   for a in ex["attempts"][-6:]))
     if extra:
         lines.append(extra)
-    return prompts.build_system(scope_desc, "", "\n".join(lines))
+    return prompts.build_system(scope_desc, ex.get("_summary", ""), "\n".join(lines))
 
 
 def _ctx(ex: dict, **kw) -> dict:
@@ -269,8 +273,8 @@ def exercise_action(svc: Services, cid: str, action: str, text: str = "", confir
         scope = Scope.from_dict(json.loads(row["scope"]))
         scope_ids = set(resolve_scope(c, scope))
         scope_desc = describe_scope(c, scope)
-        _, history = build_history(c, cid)
-    ex["_history"] = history
+        summary, history = build_history(c, cid)
+    ex["_history"], ex["_summary"] = history, summary
     provider_kind = row["provider"]
     phase = ex["phase"]
     legal = available_actions(ex)
@@ -285,7 +289,8 @@ def exercise_action(svc: Services, cid: str, action: str, text: str = "", confir
 
     def save_state(c):
         ex.pop("_history", None)
-        update_conversation(c, cid, exercise=ex)
+        ex.pop("_summary", None)
+        update_conversation(c, cid, exercise=ex, summary=build_history(c, cid)[0])
 
     # --- actions that need no model ------------------------------------------------
     if action == "pause":
