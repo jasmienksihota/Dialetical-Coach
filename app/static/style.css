@@ -92,3 +92,6 @@ details{margin:.4rem 0} summary{cursor:pointer;color:var(--muted);font-size:.85r
 code{font-family:var(--mono);font-size:.85em}
 .tagchip{font-size:.72rem;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.02rem .35rem;margin-right:.25rem}
 [hidden]{display:none !important}
+
+.scope-preview ul{margin:.2rem 0 .3rem 1.1rem;padding:0}
+.scope-preview li{font-size:.85rem}

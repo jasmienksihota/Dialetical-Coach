@@ -150,6 +150,7 @@ def _generate(svc, provider, ex, key, scope, scope_ids, scope_desc, passages, le
         phase = "attempt" if key == "open" else key.split(":")[1]
         blocks.append(app_block(FALLBACK_Q[phase], "question"))
         fallback = True
+    report["scope"] = {"description": scope_desc, "doc_ids": sorted(scope_ids)}
     report["engine"] = {"stripped_purposes": sorted(set(stripped)), "fallback_question": fallback,
                         "rubric_note": RUBRIC_NOTE}
     return blocks, report

@@ -98,7 +98,7 @@ const checkedValues = (root, name) => [...root.querySelectorAll(`input[name="${n
 function scopePicker(initial = {}) {
   const docs = state.docs.filter(d => d.approved);
   const root = h('div', { class: 'scope-picker' },
-    h('p', { class: 'small muted' }, 'Leave everything unchecked to use all approved primary documents. Otherwise the session uses the union of the documents and tags you check.'),
+    h('p', { class: 'small muted' }, 'Rule: UNION. A document is included if you check it OR it has ANY checked tag. Nothing checked = all approved primary documents. The list below shows exactly what your choice resolves to.'),
     h('strong', { class: 'small' }, 'Documents (approved only)'),
     h('div', { class: 'taglist' }, docs.length ? docs.map(d => h('label', {},
       h('input', { type: 'checkbox', name: 'doc', value: d.id, checked: (initial.doc_ids || []).includes(d.id) }),
@@ -109,7 +109,27 @@ function scopePicker(initial = {}) {
       'Include secondary study notes (not primary sources)'));
   root.value = () => ({ doc_ids: checkedValues(root, 'doc'), tags: checkedValues(root, 'tag'),
                         include_secondary: !!root.querySelector('input[name="sec"]').checked });
+  const preview = h('div', { class: 'scope-preview notice ok small', 'aria-live': 'polite' }, 'Resolving…');
+  root.append(preview);
+  let timer = null;
+  const refresh = () => {
+    clearTimeout(timer);
+    timer = setTimeout(guard(async () => renderScopeResolution(preview, await api('/api/scope/resolve', { json: root.value() }))), 120);
+  };
+  root.addEventListener('change', refresh);
+  refresh();
   return root;
+}
+
+function renderScopeResolution(el, r) {
+  const items = r.included.map(d => h('li', {}, `${d.title}${d.kind === 'secondary_notes' ? ' (secondary notes)' : ''} — ${d.reasons.join(' + ')}`));
+  const out = r.excluded.map(d => h('li', { class: 'muted' }, `${d.title}: NOT included (${d.why_excluded})`));
+  el.className = 'scope-preview notice small ' + (r.included.length ? 'ok' : 'warn');
+  el.replaceChildren(
+    h('strong', {}, `Resolves to ${r.included.length} document(s)`),
+    r.included.length ? h('ul', {}, items) : h('div', {}, 'No eligible documents: nothing can be retrieved with this selection. It will NOT fall back to all documents.'),
+    out.length ? h('div', { class: 'small' }, 'Selected but not eligible:', h('ul', {}, out)) : null,
+    h('div', { class: 'tiny' }, r.semantics));
 }
 
 function describeScope(scope) {
@@ -131,10 +151,17 @@ async function loadStatus() {
   const s = state.status;
   const chip = $('#status-chip');
   const u = s.live_usage;
+  const STAGE = {
+    none: 'Live configured · API not yet reached',
+    api_reachable: 'Live: API reachable — structured output NOT yet seen',
+    structured_output: 'Live: structured output OK — citation-validated tutoring NOT yet seen',
+    tutoring_verified: u.last_tutoring_verified ? `Live: tutoring verified (citation-validated turn, ${u.last_tutoring_verified.slice(0, 10)})` : 'Live: tutoring verified',
+  };
   chip.textContent = !s.live_configured ? 'Demo mode only — live not configured'
-    : (u.verified ? `Live verified ${u.last_success.slice(0, 10)} · ${u.requests_today}/${u.cap_per_day} requests today`
-                  : `Live configured, NOT yet verified · ${u.requests_today}/${u.cap_per_day} requests today`);
-  chip.title = `Model: ${s.model || 'not set'}. Tokens today: ${u.input_tokens_today} in / ${u.output_tokens_today} out. ${u.note}`;
+    : `${STAGE[u.stage]} · ${u.requests_today}/${u.cap_per_day} requests today`;
+  chip.title = `Model: ${s.model || 'not set'}. Tokens reported today: ${u.input_tokens_today} in / ${u.output_tokens_today} out. `
+    + 'An API success alone is not verified tutoring: that needs a reply that parses AND passes citation validation. '
+    + 'Even then, citations are checked mechanically, not for meaning. ' + u.note;
   chip.className = 'chip ' + (s.live_configured ? 'live' : 'demo');
   $('#retrieval-note').textContent = `Retrieval: ${s.retrieval_mode}. ${s.retrieval_note}`;
   $('#up-tags').replaceChildren(...tagBoxes([], 'uptag'));
@@ -390,7 +417,9 @@ function renderBlock(msg, block, bi) {
   }
   const purpose = block.purpose && PURPOSE_LABEL[block.purpose];
   return h('div', { class: `block ${block.type}` + (block.purpose === 'question' ? ' question' : ''), dataset: { type: block.type, purpose: block.purpose || '' } },
-    h('div', { class: 'lbl' }, TYPE_LABEL[block.type] || block.type, purpose ? ` · ${purpose}` : '', block.app ? ' · app-authored' : ''),
+    h('div', { class: 'lbl', title: block.status === 'uncited' ? 'No sources cited. The app only pattern-checks such blocks for obvious claims about what the sources say; it can miss paraphrase.' : null },
+      TYPE_LABEL[block.type] || block.type, purpose ? ` · ${purpose}` : '', block.app ? ' · app-authored' : '',
+      block.status === 'uncited' && !block.app ? ' · no sources cited' : ''),
     h('div', { class: 'body' }, block.text), citationChips(msg, block, bi));
 }
 
@@ -400,8 +429,14 @@ function renderMessage(msg) {
   }
   const ev = msg.evidence || [];
   const cited = ev.filter(e => e.cited).length;
+  const rep = msg.report || {};
+  const titleOf = id => (state.docs.find(d => d.id === id) || { title: id }).title;
   const evidence = ev.length ? h('details', { class: 'evidence' },
     h('summary', {}, `Evidence supplied for this turn: ${ev.length} passage(s), ${cited} cited`),
+    rep.retrieval ? h('div', { class: 'tiny' }, 'Search used: ' + rep.retrieval.query
+      + (rep.retrieval.followup ? ' — short follow-up: the earlier question was added to the search (still inside your scope).' : '')
+      + (rep.retrieval.seeks_new ? ' Passages already used last turn were excluded.' : '')) : null,
+    rep.scope ? h('div', { class: 'tiny' }, 'Documents in scope this turn: ' + (rep.scope.doc_ids.map(titleOf).join('; ') || 'none')) : null,
     ...ev.map(e => h('div', { class: 'hit' }, h('div', { class: 'meta' }, `${e.doc_title} · ${e.location} · ${e.cited ? 'cited' : 'not cited'}` + (e.doc_kind === 'secondary_notes' ? ' · secondary notes' : '')),
       h('div', { class: 'body' }, e.text.length > 300 ? e.text.slice(0, 300) + '…' : e.text),
       h('button', { class: 'link', onclick: guard(() => openPassage(e.id)) }, 'Inspect')))) : null;
@@ -421,6 +456,12 @@ function renderConversation() {
     ? h('div', { class: 'banner demo' }, state.status.demo_label)
     : h('div', { class: 'banner live' }, 'Live model: selected passages and conversation context are sent to Anthropic.');
   const scopeLine = h('div', { class: 'small muted', id: 'scope-line' }, 'Source scope (in force for the whole session): ' + describeScope(c.scope));
+  const scopeBox = h('div', { class: 'scope-preview notice small ok', id: 'scope-resolved' }, 'Resolving…');
+  const scopeDetails = h('details', { id: 'scope-details' }, h('summary', {}, 'Documents in scope right now'), scopeBox);
+  api('/api/scope/resolve', { json: c.scope }).then(r => {
+    renderScopeResolution(scopeBox, r);
+    scopeDetails.querySelector('summary').textContent = `Documents in scope right now: ${r.included.length}`;
+  }).catch(() => {});
   const header = h('div', { class: 'row wrap' },
     h('h2', { id: 'conv-title' }, c.title),
     h('button', { onclick: guard(async () => {
@@ -437,7 +478,7 @@ function renderConversation() {
   const handoff = h('div', { class: 'tiny' }, 'Export is a manual handoff for NotebookLM or another notes tool — a one-time Markdown snapshot, not synchronization.');
   const summary = c.summary ? h('details', {}, h('summary', {}, 'Earlier turns condensed (app-generated)'), h('div', { class: 'ctx' }, c.summary), h('div', { class: 'tiny' }, c.summary_note)) : null;
   const thread = h('div', { class: 'thread', id: 'thread' }, ...c.messages.map(renderMessage));
-  view.replaceChildren(...[header, banner, scopeLine, handoff, summary, thread,
+  view.replaceChildren(...[header, banner, scopeLine, scopeDetails, handoff, summary, thread,
     c.mode === 'exercise' ? exercisePanel(c) : chatComposer(c)].filter(Boolean));
   const last = thread.lastElementChild;
   if (last) last.scrollIntoView({ block: 'nearest' });
@@ -455,6 +496,7 @@ function chatComposer(c) {
     try {
       await api(`/api/conversations/${c.id}/messages`, { json: { text, intent: intent.value } });
       await openConversation(c.id);
+      loadStatus();
     } finally { send.disabled = false; send.textContent = 'Send'; }
   }));
   return h('div', { class: 'panel' }, ta, h('div', { class: 'row wrap actions' }, intent, send,
@@ -471,7 +513,7 @@ function exercisePanel(c) {
       if (!confirm(r.message)) return;
       r = await api(`/api/conversations/${c.id}/exercise`, { json: { action, text: '', confirm: true } });
     }
-    state.current = r.conversation; renderConversation(); loadConvs();
+    state.current = r.conversation; renderConversation(); loadConvs(); loadStatus();
   });
   const btn = (id, label, action, cls = '') => acts.includes(action) ? h('button', { id, class: cls, onclick: run(action) }, label) : null;
   const clarifyBox = h('div', { hidden: true, class: 'row' }, h('input', { type: 'text', id: 'clarify-text', placeholder: 'Ask a clarifying question about the scenario' }),

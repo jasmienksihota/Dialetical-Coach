@@ -132,6 +132,14 @@ def test_smoke_flow(page, server):
     # --- start the demo exercise
     page.click("#nav button[data-view=sessions]")
     page.click("#new-exercise-btn")
+    page.wait_for_selector("#new-panel .scope-preview")
+    page.wait_for_function("document.querySelector('#new-panel .scope-preview').textContent.includes('Resolves to 3 document')")
+    assert "UNION" in page.inner_text("#new-panel .scope-preview")
+    page.check("#new-panel label:has-text('Cadre development') input")          # tag -> resolved list updates
+    page.wait_for_function("document.querySelector('#new-panel .scope-preview').textContent.includes('Resolves to 1 document')")
+    assert "tag: Cadre development" in page.inner_text("#new-panel .scope-preview")
+    page.uncheck("#new-panel label:has-text('Cadre development') input")
+    page.wait_for_function("document.querySelector('#new-panel .scope-preview').textContent.includes('Resolves to 3 document')")
     page.click("#ex-start")
     page.wait_for_selector("#ex-panel")
     assert "Waiting for your first attempt" in page.inner_text("#ex-phase")
@@ -139,6 +147,10 @@ def test_smoke_flow(page, server):
     assert page.locator(".block.fiction").count() == 1
     assert "FICTIONAL" in page.locator(".block.fiction").inner_text()
     assert page.locator(".block.question").count() == 1
+    page.click("#scope-details summary")
+    assert "Documents in scope right now: 3" in page.inner_text("#scope-details")
+    page.locator(".evidence summary").first.click()
+    assert "Documents in scope this turn" in page.inner_text(".msg.assistant")
     assert page.locator(".block.quote .cites .cite-chip").count() >= 1
     shot(page, "3-exercise-start")
 
@@ -176,3 +188,23 @@ def test_smoke_flow(page, server):
     shot(page, "5-finished")
 
     assert page.errors == [], page.errors
+
+
+def test_live_status_chip_does_not_overclaim(tmp_path, page):
+    """Live configured but never called: the badge must not say 'verified'."""
+    app = create_app(Settings(data_dir=tmp_path / "d", live_enabled=True, anthropic_api_key="x" * 12,
+                              anthropic_model="claude-sonnet-5-5"), lambda kind: (_ for _ in ()).throw(AssertionError("no live call allowed")))
+    s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+    srv = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning"))
+    t = threading.Thread(target=srv.run, daemon=True); t.start()
+    for _ in range(100):
+        if srv.started:
+            break
+        time.sleep(0.05)
+    try:
+        page.goto(f"http://127.0.0.1:{port}")
+        page.wait_for_function("document.querySelector('#status-chip').textContent.length > 0")
+        text = page.inner_text("#status-chip")
+        assert "API not yet reached" in text and "verified" not in text.lower()
+    finally:
+        srv.should_exit = True; t.join(timeout=5)

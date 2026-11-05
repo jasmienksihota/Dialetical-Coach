@@ -104,6 +104,7 @@ class AnthropicProvider(Provider):
         self.guard = guard
         self.max_retries = max(0, min(int(max_retries), 2))
         self._sleep = sleep
+        self.last_call_id = None          # id of the live_calls row behind the latest reply
         if client is None:
             import anthropic
             client = anthropic.Anthropic(api_key=api_key, max_retries=0, timeout=60.0)
@@ -167,6 +168,7 @@ class AnthropicProvider(Provider):
                 raise self._map(e) from e
             if self.guard:
                 self.guard.finish(call_id, "ok", usage=getattr(resp, "usage", None))
+            self.last_call_id = call_id
             break
         if getattr(resp, "stop_reason", None) == "max_tokens":
             log.warning("live response hit the max_tokens limit (%s); output may be truncated", self.max_tokens)

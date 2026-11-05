@@ -248,7 +248,7 @@ def test_followup_reuses_previous_cited_passages(tmp_path):
     e.say(cid, Q)
     first = prov.requests[0].passages[0]["id"]
     r = e.say(cid, "Can you say more about that?").json()
-    assert r["retrieval"]["query"].startswith(Q[:20])                 # short follow-up reuses prior question
+    assert r["retrieval"]["followup"] and r["retrieval"]["anchor"] == Q and Q in r["retrieval"]["query"]
     assert first in [p["id"] for p in prov.requests[1].passages]
 
 

@@ -19,7 +19,7 @@ from .ingest import ingest_file
 from .livecontrol import LiveGuard
 from .modes import LEVELS, MODES, RUBRIC_NOTE
 from .providers import make_provider_factory
-from .retrieval import Scope, get_retriever
+from .retrieval import Scope, explain_scope, get_retriever
 from .tutor import Services, chat_turn
 
 STATIC = Path(__file__).parent / "static"
@@ -199,6 +199,12 @@ def create_app(settings: Settings | None = None, provider_factory=None) -> FastA
     def passage(chunk_id: str, context: int = 2):
         with db.tx() as c:
             return library.get_passage(c, chunk_id, max(0, min(context, 5)))
+
+    @app.post("/api/scope/resolve")
+    def resolve(body: ScopeIn):
+        """Which documents a scope actually resolves to, and why each is in or out."""
+        with db.tx() as c:
+            return explain_scope(c, Scope.from_dict(body.model_dump()))
 
     @app.get("/api/search")
     def search(q: str, doc_ids: str = "", tags: str = "", include_secondary: bool = False,

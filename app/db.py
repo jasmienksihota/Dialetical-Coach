@@ -91,6 +91,8 @@ CREATE TABLE IF NOT EXISTS live_calls (        -- one row per live API request a
     input_chars INTEGER NOT NULL DEFAULT 0,
     input_tokens INTEGER,
     output_tokens INTEGER,
+    structured INTEGER,                         -- 1 = reply parsed into valid typed blocks, 0 = not
+    citations_ok INTEGER,                       -- 1 = validated turn with >=1 verified citation, no invalid blocks
     error TEXT                                  -- exception class / status only, never content
 );
 CREATE INDEX IF NOT EXISTS idx_live_day ON live_calls(day);
@@ -109,6 +111,10 @@ class Database:
         self.fts = False
         with self.tx() as conn:
             conn.executescript(SCHEMA)
+            cols = {r["name"] for r in conn.execute("PRAGMA table_info(live_calls)")}
+            for col in ("structured", "citations_ok"):      # migrate databases created before these existed
+                if col not in cols:
+                    conn.execute(f"ALTER TABLE live_calls ADD COLUMN {col} INTEGER")
             if not force_no_fts:
                 self.fts = self._ensure_fts(conn)
 

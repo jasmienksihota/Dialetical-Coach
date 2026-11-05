@@ -65,7 +65,7 @@ def test_check_command_prints_no_secret_and_never_pings_by_default(tmp_path, mon
     monkeypatch.setenv("TUTOR_LIVE_ENABLED", "1")
     assert check_main([]) == 0
     out = capsys.readouterr().out
-    assert SECRET not in out and "set (hidden)" in out and "NO - no successful live request" in out
+    assert SECRET not in out and "set (hidden)" in out and "tutoring verified:      NO" in out and "API reachable:          NO" in out
     assert "not a dollar spending cap" in out
     monkeypatch.setenv("TUTOR_LIVE_ENABLED", "0")
     assert check_main(["--ping", "--yes"]) == 2         # refuses without opt-in; nothing sent
@@ -200,7 +200,7 @@ def test_token_usage_is_logged_without_content_or_key(tmp_path, caplog):
     assert "input_tokens=321" in caplog.text and "output_tokens=123" in caplog.text
     assert SECRET not in caplog.text and secret_prompt not in caplog.text
     u = g.summary()
-    assert (u["input_tokens_today"], u["output_tokens_today"], u["verified"]) == (321, 123, True)
+    assert (u["input_tokens_today"], u["output_tokens_today"], u["api_reachable"], u["tutoring_verified"]) == (321, 123, True, False)
     raw = (tmp_path / "d" / "tutor.db").read_bytes()
     assert secret_prompt.encode() not in raw and SECRET.encode() not in raw
 
@@ -210,7 +210,7 @@ def test_verified_flag_only_after_a_real_success(tmp_path):
     s, db, g, p = guarded(tmp_path, client)
     with pytest.raises(ProviderError):
         p.generate(req())
-    assert g.summary()["verified"] is False and g.summary()["requests_today"] == 1      # failures never "verify"
+    assert g.summary()["api_reachable"] is False and g.summary()["requests_today"] == 1      # failures never "verify"
 
 
 # ------------------------------------------------------------------ opt-in at the API level
@@ -224,7 +224,7 @@ def test_live_session_needs_server_optin_and_explicit_acknowledgement(tmp_path):
     r = full.client.post("/api/exercises", json={"provider": "live"})
     assert r.status_code == 400 and "acknowledged explicitly" in r.json()["detail"]
     st = full.client.get("/api/status").json()
-    assert st["live_configured"] and st["live_usage"]["verified"] is False and st["model"] == "claude-sonnet-5-5"
+    assert st["live_configured"] and st["live_usage"]["tutoring_verified"] is False and st["live_usage"]["stage"] == "none" and st["model"] == "claude-sonnet-5-5"
     assert st["live_limits"]["max_requests_per_day"] == 20 and SECRET not in json.dumps(st)
 
 

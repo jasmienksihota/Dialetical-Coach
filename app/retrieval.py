@@ -95,6 +95,40 @@ def describe_scope(conn, scope: Scope) -> str:
     return " | ".join(parts)
 
 
+SCOPE_SEMANTICS = (
+    "Documents and tags combine as a UNION: a document is included if it is checked directly OR "
+    "carries ANY checked tag. Only approved documents with extracted text are ever included, and "
+    "secondary study notes only if you opt in. If nothing is checked, ALL approved primary "
+    "documents are included. Checking something that is not eligible never widens the scope.")
+
+
+def explain_scope(conn, scope: Scope) -> dict:
+    """The resolved document list with the reason each document is in or out."""
+    labels = dict(TAGS)
+    eligible = set(resolve_scope(conn, scope))
+    rows = conn.execute("SELECT * FROM documents ORDER BY title").fetchall()
+    tag_map: dict[str, list[str]] = {}
+    for r in conn.execute("SELECT doc_id, tag FROM document_tags"):
+        tag_map.setdefault(r["doc_id"], []).append(r["tag"])
+    selecting = bool(scope.doc_ids or scope.tags)
+    included, excluded = [], []
+    for d in rows:
+        reasons = []
+        if d["id"] in scope.doc_ids:
+            reasons.append("selected directly")
+        reasons += [f"tag: {labels.get(t, t)}" for t in tag_map.get(d["id"], []) if t in scope.tags]
+        if d["id"] in eligible:
+            included.append({"id": d["id"], "title": d["title"], "kind": d["kind"],
+                             "reasons": reasons or ["no filter: all approved primary documents"]})
+        elif reasons:   # selected or tagged, but not eligible
+            why = ("not approved" if not d["approved"] else "no extracted text" if d["chunk_count"] == 0
+                   else "secondary study notes (opt in to include)")
+            excluded.append({"id": d["id"], "title": d["title"], "reasons": reasons, "why_excluded": why})
+    return {"semantics": SCOPE_SEMANTICS, "mode": "selection" if selecting else "all",
+            "included": included, "excluded": excluded,
+            "include_secondary": scope.include_secondary}
+
+
 def query_terms(query: str, limit: int = 12) -> list[str]:
     seen, out = set(), []
     for tok in re.findall(r"[\w'-]+", (query or "").lower()):
@@ -134,7 +168,7 @@ class Retriever(ABC):
 
     @abstractmethod
     def search(self, conn, query: str, scope: Scope, limit: int = 6,
-               min_docs: int = 1) -> RetrievalResult: ...
+               min_docs: int = 1, exclude_ids: set[str] | None = None) -> RetrievalResult: ...
 
 
 class LexicalRetriever(Retriever):
@@ -144,20 +178,22 @@ class LexicalRetriever(Retriever):
         self.use_fts = use_fts
 
     # candidate generation ------------------------------------------------------
-    def _candidates_fts(self, conn, terms, doc_ids, pool):
+    def _candidates_fts(self, conn, terms, doc_ids, pool, exclude=()):
         match = " OR ".join(f'"{t}"' for t in terms)
         marks = ",".join("?" * len(doc_ids))
+        ex = f" AND c.id NOT IN ({','.join('?' * len(exclude))})" if exclude else ""
         rows = conn.execute(
             f"""SELECT c.id AS id, bm25(chunks_fts) AS s FROM chunks_fts
                 JOIN chunks c ON c.id = chunks_fts.chunk_id
-                WHERE chunks_fts MATCH ? AND c.doc_id IN ({marks})
-                ORDER BY s LIMIT ?""", (match, *doc_ids, pool)).fetchall()
+                WHERE chunks_fts MATCH ? AND c.doc_id IN ({marks}){ex}
+                ORDER BY s LIMIT ?""", (match, *doc_ids, *exclude, pool)).fetchall()
         return [(r["id"], -float(r["s"])) for r in rows]
 
-    def _candidates_fallback(self, conn, terms, doc_ids, pool):
+    def _candidates_fallback(self, conn, terms, doc_ids, pool, exclude=()):
         marks = ",".join("?" * len(doc_ids))
-        rows = conn.execute(
+        rows = [r for r in conn.execute(
             f"SELECT id, text FROM chunks WHERE doc_id IN ({marks})", doc_ids).fetchall()
+            if r["id"] not in exclude]
         prefixes = [_prefix(t) for t in terms]
         tokenized = [(r["id"], re.findall(r"[\w'-]+", r["text"].lower())) for r in rows]
         n = max(1, len(tokenized))
@@ -176,7 +212,7 @@ class LexicalRetriever(Retriever):
         return scored[:pool]
 
     # public --------------------------------------------------------------------
-    def search(self, conn, query, scope, limit=6, min_docs=1) -> RetrievalResult:
+    def search(self, conn, query, scope, limit=6, min_docs=1, exclude_ids=None) -> RetrievalResult:
         terms = query_terms(query)
         mode = "sqlite-fts5" if self.use_fts else "lexical-fallback"
         doc_ids = resolve_scope(conn, scope)
@@ -186,8 +222,9 @@ class LexicalRetriever(Retriever):
             return RetrievalResult([], "none", 0, terms, mode, [note])
 
         pool = max(limit * 6, 30)
-        cands = (self._candidates_fts(conn, terms, doc_ids, pool) if self.use_fts
-                 else self._candidates_fallback(conn, terms, doc_ids, pool))
+        exclude = tuple(exclude_ids or ())
+        cands = (self._candidates_fts(conn, terms, doc_ids, pool, exclude) if self.use_fts
+                 else self._candidates_fallback(conn, terms, doc_ids, pool, exclude))
         hits = []
         for cid, score in cands:
             chunk = conn.execute("SELECT * FROM chunks WHERE id=?", (cid,)).fetchone()

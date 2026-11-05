@@ -28,6 +28,7 @@ OUTPUT FORMAT: call submit_response with an ordered list of blocks. Block types:
 - coaching: your instructions, questions or feedback on the learner's reasoning. No source claims.
 - limits: what the selected library does not establish.
 Every block that reports what a text says must carry citations (passage_id, optional verbatim "quote").
+CONTRACT: statements about what the texts say, argue, recommend, show or teach (including paraphrase) may ONLY appear in quote/interpretation/synthesis blocks WITH citations. Do not put them in coaching, fiction or limits blocks: the app checks for this and withholds offending blocks. "limits" blocks may only say what the selected library does NOT establish. "fiction" blocks are invented material and must never cite or attribute anything to a source. "coaching" is for questions, instructions and feedback on the learner's reasoning.
 """
 
 EXERCISE_RULES = """\

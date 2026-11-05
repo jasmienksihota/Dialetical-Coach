@@ -27,7 +27,9 @@ def report(s: Settings, guard: LiveGuard, db: Database) -> list[str]:
         f"ANTHROPIC_MODEL:        {s.anthropic_model or 'NOT set'}",
         f"TUTOR_LIVE_ENABLED:     {'yes' if s.live_enabled else 'no (live calls refused)'}",
         f"live configured:        {'yes' if s.live_configured else 'no'}",
-        f"live verified:          {'yes, last success ' + u['last_success'] if u['verified'] else 'NO - no successful live request recorded yet'}",
+        f"API reachable:          {'yes (last ' + u['last_api_success'] + ')' if u['api_reachable'] else 'NO - no successful live HTTP request recorded yet'}",
+        f"structured output:      {'yes (last ' + u['last_structured'] + ')' if u['structured_output'] else 'NO - no usable structured reply seen yet'}",
+        f"tutoring verified:      {'yes (last ' + u['last_tutoring_verified'] + ')' if u['tutoring_verified'] else 'NO - no citation-validated tutoring turn yet'}",
         f"max requests / UTC day: {s.live_max_requests_per_day}  (used today: {u['requests_today']})",
         f"max output tokens/req:  {s.anthropic_max_tokens}  (hard ceiling 4096)",
         f"max retries:            {s.live_max_retries}  (each retry counts as a request)",
@@ -68,9 +70,19 @@ def main(argv=None) -> int:
     except ProviderError as e:
         print(f"\nPing FAILED: {e.message}")
         return 1
-    print("\nPing succeeded: the key and model ID were accepted and a structured reply came back.")
+    try:
+        from .citations import normalize_blocks
+        normalize_blocks(out)
+        guard.mark(prov.last_call_id, structured=True)
+        structured = True
+    except ValueError:
+        guard.mark(prov.last_call_id, structured=False)
+        structured = False
+    print("\nAPI request succeeded (key and model ID were accepted)."
+          + (" The reply was valid structured output." if structured else " BUT the reply was NOT usable structured output."))
     print(f"Reply (truncated): {str(out)[:160]}")
-    print("\n".join(report(s, guard, db)[4:5] + report(s, guard, db)[9:11]))
+    print("This does NOT verify tutoring: ask a real question about approved documents in the app; only a "
+          "turn whose citations pass validation counts.")
     return 0
 
 
