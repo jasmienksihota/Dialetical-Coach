@@ -178,12 +178,15 @@ def chat_turn(svc: Services, cid: str, text: str, intent: str = "ask") -> dict:
                                    min_docs=2 if compare else 1, exclude_ids=exclude)
         passages = [snapshot(h) for h in res.hits]
         have = {p["id"] for p in passages}
-        if fu.seeks_new:
-            carry_ids = []                                   # they asked for something NEW
+        if fu.seeks_new or not fu.is_followup:
+            # Something NEW was asked for, or this is a new substantive question: use fresh retrieval
+            # only. Carrying old evidence here would let an unrelated question inherit (and be answered
+            # from) the previous topic's passages and would mask the insufficient-evidence refusal.
+            carry_ids = []
         elif prev_cited:
             carry_ids = prev_cited[:3]
         else:
-            carry_ids = prev_supplied[:3] if fu.is_followup else []
+            carry_ids = prev_supplied[:3]
         carried = fetch_snapshots(c, [p for p in carry_ids if p not in have], scope_ids)
     passages += carried
     retrieval_info = {"strength": res.strength, "notes": res.notes, "mode": res.mode,
