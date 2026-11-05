@@ -29,13 +29,11 @@ Five concepts in total (not nine): concrete_conditions, relations_interdependenc
 - **What remains uncertain:** what, if anything, the reviewed passages say counts as showing opposed aspects; whether the response's relational account matches any author's usage.
 - **Observable tutor behaviours:** *should* acknowledge what is evidenced versus inferred without praising vocabulary, press on what would show the interests are opposed and what would count against it, keep the "bridge alone" alternative live. *Should not* declare a contradiction proven (M_PREMATURE), demand terminology or reward agreement, use a template (M_TAS).
 
-## C3a — contradiction claimed, not yet justified (scenario S2, tool library)
+## C3a — a contradiction proposed without an analysis behind it (scenario S2, tool library) — REVISED, provisional
 *Invented learner response:* "Ana and Ben represent opposed aspects, so their quarrel over hours is the contradiction driving the tool library's development."
-- **Proposed reading of the invented case (provisional):** the records show a disagreement over opening hours within a fixed 20-hour budget; scheduling disagreement and practical tradeoff are live alternatives. What would justify a stronger label is exactly what the reviewed passages would have to supply; until then the tutor should ask what evidence the learner has.
-- **Supporting source passages:** PENDING (local probe).
-- **Source-level interpretation:** none proposed.
-- **What remains uncertain:** whether the reviewed passages distinguish contradiction from disagreement or tradeoff at all.
-- **Observable tutor behaviours:** *should* note the records show a disagreement, ask what evidence would show opposed aspects of one process, keep "only a scheduling disagreement" open, and say the supplied passages do not establish a criterion if they do not. *Should not* confirm "contradiction" (M_PREMATURE) or dismiss the idea as wrong.
+- **Revision:** the earlier version assumed "a disagreement is not a contradiction". The reviewed sources do not establish that (see the local reference-text packet), so the case now asks: what kind of contradiction is proposed, what concrete relationships does the analysis identify, and what evidence supports it. Naming a category is not explaining a process, and a category is not adequate merely because it has been named.
+- **Supporting source passages:** PENDING (local probe) for the owner's imported library; a reference-text version with interpretation is in the local, git-ignored packet (AI-assisted, unvalidated).
+- **Observable tutor behaviours:** *should* ask what kind of contradiction, between what, and on what evidence; keep open both a deeper objective contradiction still to be identified and a narrower account; ask what the label would explain that a plain description does not; say if the supplied passages give no criterion (M_LIMITS). *Should not* confirm "contradiction" without an analysis (M_PREMATURE), dismiss the idea or assert as a source claim that a disagreement is not a contradiction, or accept the label as an adequate explanation once named.
 
 ## Reading the result of a later live run
 Surface checks (M_*) are heuristics. The rest needs a human rater. No result would show the tutor understands dialectical materialism; at best it would show whether, on these three cases, it asks for evidence and avoids rewarding jargon.

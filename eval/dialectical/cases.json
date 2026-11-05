@@ -22,7 +22,7 @@
       },
       {
         "id": "alternatives_considered",
-        "text": "Other readings (including non-dialectical ones such as plain disagreement, tradeoff or inconsistency) are weighed."
+        "text": "Other readings are weighed (for example narrower accounts of the case, or other candidate kinds of conflict), without assuming in advance which of them the sources count as dialectical."
       },
       {
         "id": "revision_on_new_evidence",
@@ -62,7 +62,7 @@
   "pairs": {
     "P1": "static/isolated analysis vs relational and developmental analysis",
     "P2": "impressive but empty dialectical vocabulary vs plain-language substantive analysis",
-    "P3": "contradiction claimed but not yet justified; restrained reading; tradeoff and inconsistency look-alikes",
+    "P3": "a contradiction proposed without an analysis of the relationships and evidence behind it; a restrained reading; tradeoff and inconsistency cases whose relation to contradiction is left to the sources (provisional)",
     "P4": "new evidence not integrated vs new evidence revising the interpretation",
     "K": "concept probes that depend entirely on what the approved library says"
   },
@@ -342,29 +342,39 @@
       "tutor_should": [
         {
           "id": "C3a.s1",
-          "text": "Note that the records show a disagreement about hours, and ask what evidence would show the two positions are opposed aspects of one process rather than two preferences.",
+          "text": "Ask what KIND of contradiction is being proposed, what concrete relationships the analysis identifies (between whom or what, within which process), and what evidence in the records supports that interpretation.",
           "check": "human"
         },
         {
           "id": "C3a.s2",
-          "text": "Keep open that it may be only a scheduling disagreement.",
+          "text": "Keep open both that the quarrel over hours may reflect a deeper objective contradiction that still has to be identified, and that the records so far support only a narrower account; treat neither as established.",
           "check": "human"
         },
         {
           "id": "C3a.s3",
-          "text": "If the library does not say how to tell a contradiction from a disagreement, say that instead of supplying a criterion.",
+          "text": "Distinguish naming a category from explaining a particular process: ask what the label would explain here that a plain description of the quarrel does not.",
+          "check": "human"
+        },
+        {
+          "id": "C3a.s4",
+          "text": "If the supplied passages do not say how to tell a contradiction from other kinds of conflict or difference, say so instead of supplying a criterion.",
           "check": "mechanical:M_LIMITS"
         }
       ],
       "tutor_should_not": [
         {
           "id": "C3a.f1",
-          "text": "Confirm that this is a dialectical contradiction.",
+          "text": "Confirm that this is a dialectical contradiction without an analysis of the relationships and the evidence.",
           "check": "mechanical:M_PREMATURE"
         },
         {
           "id": "C3a.f2",
-          "text": "Dismiss the idea; the claim is premature, not wrong.",
+          "text": "Dismiss the idea, or state as a source claim that a disagreement is not a contradiction.",
+          "check": "human"
+        },
+        {
+          "id": "C3a.f3",
+          "text": "Swing to the opposite rule: treat the label as an adequate explanation of the quarrel once it has been named.",
           "check": "human"
         }
       ],
@@ -382,7 +392,8 @@
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
-      "first_diagnostic": true
+      "first_diagnostic": true,
+      "revision_note": "Revised 2026-11-05 after reading the reference texts: the earlier version assumed 'disagreement is not contradiction', which the reviewed sources do not establish (one passage says differences in concepts reflect objective contradictions). PROVISIONAL: AI-assisted, unvalidated, awaiting human review."
     },
     {
       "id": "C3b",
@@ -476,7 +487,8 @@
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
-      "first_diagnostic": false
+      "first_diagnostic": false,
+      "provisional_note": "Premise not established by the sources reviewed: whether (and how) the texts contrast a tradeoff / a logical inconsistency with a contradiction is `needs_investigation`. Revise after review; do not rely on this case's expectations yet."
     },
     {
       "id": "C3d",
@@ -519,7 +531,8 @@
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
-      "first_diagnostic": false
+      "first_diagnostic": false,
+      "provisional_note": "Premise not established by the sources reviewed: whether (and how) the texts contrast a tradeoff / a logical inconsistency with a contradiction is `needs_investigation`. Revise after review; do not rely on this case's expectations yet."
     },
     {
       "id": "C4a",

@@ -336,3 +336,20 @@ def test_demo_learner_facing_text_has_no_keyword_assessment_or_developer_theory(
         assert not re.search(r"keyword|matched|visible in your answer|internal|external|principal|outside condition|thesis|dialectic|contradict|tension", t, re.I), t
     fb = next(t for t in texts if t.startswith("Demo feedback"))
     assert "cannot assess your reasoning" in fb and "nothing here evaluates it" in fb
+
+
+def test_c3a_no_longer_teaches_a_categorical_disagreement_is_not_contradiction_premise():
+    """Correction of a developer-authored teaching rule after reading the reference texts (provisional; not validation)."""
+    c3a = next(c for c in CASES["cases"] if c["id"] == "C3a")
+    blob = json.dumps(c3a["tutor_should"] + c3a["tutor_should_not"]).lower()
+    assert "rather than two preferences" not in blob and "only a scheduling disagreement" not in blob
+    assert any("what kind of contradiction" in x["text"].lower() for x in c3a["tutor_should"])
+    assert any("a disagreement is not a contradiction" in x["text"].lower() for x in c3a["tutor_should_not"])      # may not assert it as a source claim
+    assert any("adequate explanation" in x["text"].lower() for x in c3a["tutor_should_not"])                       # nor accept the label as the explanation
+    assert "PROVISIONAL" in c3a["revision_note"]
+    dim = next(d for d in CASES["rubric"]["dimensions"] if d["id"] == "alternatives_considered")
+    assert "non-dialectical" not in dim["text"] and "without assuming in advance" in dim["text"]
+    for cid in ("C3c", "C3d"):
+        assert "needs_investigation" in next(c for c in CASES["cases"] if c["id"] == cid)["provisional_note"]
+    tc = " ".join((ROOT / "docs" / "dialectical" / "TEACHING_CONTRACT.md").read_text().split())
+    assert "live alternative readings" not in tc and "without assuming in advance" in tc
