@@ -1,57 +1,56 @@
-# Visual design: Sugar Doodle direction
+# Visual design: Ethereal direction (design-revision branch)
 
-**Provenance.** The primary reference is the "Sugar Doodle Examples" design artifact (a shop landing page plus its Sugar Doodle token set). I read its source and tokens; I did **not** see it rendered. The earlier handmade/Pinterest direction was itself inferred, not a verified preference. Nothing here claims to match Jasmien's taste: it is a reversible visual pass, and the app is still in demo mode.
+**Provenance.** Source: the "Ethereal" Design System artifact (README + tokens + cover preview; read as source, not seen rendered). It replaces the earlier Sugar Doodle pass. The direction is a stated preference relayed through another session, not something I could verify with the owner; the app is still demo mode.
 
-## What was taken from the reference, and what was not
-Taken: cream paper page (#FBF4E6) with paper-white surfaces, warm ink (#3B2F2A) used for text *and* 2px outlines, pill buttons and nav chips, 24px card radius, solid "sticker" offset shadow on primary buttons, pastel fills (peony, blush, butter, lilac, sky, matcha), the four-point sparkle motif, marker-highlight under headings, Fredoka (headings) / Nunito (body) / Caveat (short empty-state notes only).
-Deliberately **not** taken: shop/cart/newsletter/product UI, tilted cards, twinkle animation, scalloped dividers, remote Google Fonts. Sticker shadows are limited to primary/approve buttons, the active session and the exercise panel, never behind long text. Fonts are bundled locally in `app/static/fonts/` (SIL OFL licence included); the app makes no remote font requests.
+## Taken from Ethereal
+cotton-haze page (#F5E9F0) and pearl surfaces, ink #2C2438, Jost 300 display + Jost 400 body + DM Mono for meta/nav/labels (bundled locally in `app/static/fonts`, SIL OFL licences included, no remote requests), square corners (2px inputs), 1px hairline/outline controls, one heavy twilight header band, soft horizontal pastel smears behind the page, chromatic ghost on large headings, candy-wine links, baby-pink selection, mint for approve/ok, butter-glow passage highlight.
+
+## Adapted for a reading tool (deviations)
+- **Lowercase is interface-only** (nav, buttons, headings, badges). Passages, quotes, answers, document titles, citations, chips with titles, and the required disclosure wording ("Demo: scripted responses, not live tutoring.", "citation checks passed", scope notices) keep their original case.
+- **No grain, no drifting/blur-breathing motion, no blurred images**: nothing textured or moving behind long text; smears sit behind opaque panels only. Reduced-motion is respected (nothing animates).
+- No sparkles/icons (the previous star motif was removed, per the Ethereal "avoid" list).
+- Dark mode is **not part of Ethereal**; it is my derivation (deep violet ground, pearl ink) and is contrast-checked below.
+- The passage highlight is ink on butter-glow over a pearl panel (the README warns against butter-glow text on haze; this pairing is measured).
 
 ## Where to change things
-- **Tokens (colours, fonts, radii, shadows):** the marked block at the top of `app/static/style.css` (light `:root`; dark in `@media (prefers-color-scheme: dark)`).
-- **Sparkle:** `app/static/star.svg` (theme-aware inside the file), used via the `.star` class in the brand and empty states.
-- **Contrast:** `python scripts/check_contrast.py [--markdown]` recomputes the table below.
+Tokens: marked block at the top of `app/static/style.css` (overrides for this direction are at the end of the file). Contrast: `python scripts/check_contrast.py [--markdown]`. Screenshots: `python scripts/make_screenshots.py` (real app, synthetic fixtures, demo provider, light+dark, 1280 and 390px, asserts no horizontal scroll) → `docs/design/screenshots/`.
 
-## Layout changes in this pass (CSS plus two tiny markup edits)
-- Conversation: bubbles with outlines, user messages blush, answer blocks keep their coloured left bars and labels; passages/answers capped at 68ch.
-- Passage inspection: on screens ≥1100px the passage dialog is a right-hand drawer (conversation stays visible); on narrow screens it is a centred dialog. It is a **modal** passage drawer, not a side-by-side interactive workspace: the page behind is `inert`, focus enters the drawer, stays inside, and returns to the opening control (e.g. the citation chip) on close.
-- New session: the two form sections are numbered (1 Source scope, 2 Tutor) with the same controls; nothing removed.
-- Library/history: same outlined cards, pastel badges and pills.
-- **Not delivered:** a persistent in-page source panel, library search/filter, or any new workflow.
+## Functionality retained
+Same markup and ids; passage view remains a modal drawer on ≥1100px (page behind is inert, focus trap, Escape, focus restored; covered by `tests/e2e/test_dialog_and_scope.py`). Not delivered: persistent source panel, library search, new workflows.
 
 ## Measured contrast (WCAG 2.x; light / dark)
 | Pairing | Target | Light | Dark |
 |---|---|---|---|
-| Body text on page (`ink` on `bg`) | 4.5:1 | 11.80 | 14.22 |
-| Body text on reading surface (`ink` on `panel`) | 4.5:1 | 12.70 | 12.68 |
-| Muted text on page (`muted` on `bg`) | 4.5:1 | 5.98 | 8.88 |
-| Muted text on reading surface (`muted` on `panel`) | 4.5:1 | 6.44 | 7.91 |
-| Primary button text on peony (`btn-ink` on `btn`) | 4.5:1 | 6.60 | 6.60 |
-| Approve button text on matcha (`leaf-ink` on `leaf`) | 4.5:1 | 7.15 | 7.75 |
-| Olive text on page (`leaf-text` on `bg`) | 4.5:1 | 5.59 | 10.87 |
-| Passage highlight / step number text (`hl-ink` on `hl`) | 4.5:1 | 10.11 | 10.11 |
-| Ink on butter (warning, question, passage target) (`ink` on `butter`) | 4.5:1 | 10.11 | 7.32 |
-| Ink on sky (cite chip) (`ink` on `sky`) | 4.5:1 | 9.40 | 9.38 |
-| Ink on lilac (tag chip, cite hover) (`ink` on `lilac`) | 4.5:1 | 7.32 | 7.95 |
-| Link peony-deep on surface (`accent` on `panel`) | 4.5:1 | 5.10 | 7.40 |
-| Link peony-deep on page (`accent` on `bg`) | 4.5:1 | 4.74 | 8.30 |
-| Text on blush (user message, selected, passage) (`blush-ink` on `blush`) | 4.5:1 | 9.76 | 9.48 |
-| Body text on blush (nav hover) (`ink` on `blush`) | 4.5:1 | 9.76 | 10.29 |
-| Warning notice (`warn-ink` on `warn-bg`) | 4.5:1 | 10.11 | 8.25 |
-| Error / withheld notice (`bad-ink` on `bad-bg`) | 4.5:1 | 6.39 | 7.97 |
-| OK notice / live chip (`ok-ink` on `ok-bg`) | 4.5:1 | 7.76 | 8.75 |
-| Label: quotation (`quote` on `panel`) | 4.5:1 | 5.10 | 7.40 |
-| Label: interpretation (`interp` on `panel`) | 4.5:1 | 6.95 | 8.32 |
-| Label: synthesis (`synth` on `panel`) | 4.5:1 | 6.56 | 8.33 |
-| Label: fiction (`fiction` on `panel`) | 4.5:1 | 6.12 | 8.11 |
-| Label: app coaching (`coach` on `panel`) | 4.5:1 | 6.44 | 7.91 |
-| Label: limits (`limits` on `panel`) | 4.5:1 | 7.46 | 7.24 |
-| Input / button boundary vs surface (UI 3:1) (`line-strong` on `panel`) | 3.0:1 | 12.70 | 9.25 |
-| Input boundary vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 11.80 | 10.38 |
-| Focus ring vs page (UI 3:1) (`focus` on `bg`) | 3.0:1 | 11.80 | 14.22 |
-| Focus ring vs surface (UI 3:1) (`focus` on `panel`) | 3.0:1 | 12.70 | 12.68 |
-| Outline vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 11.80 | 10.38 |
+| Body text on page (`ink` on `bg`) | 4.5:1 | 12.56 | 14.49 |
+| Body text on reading surface (`ink` on `panel`) | 4.5:1 | 14.17 | 12.76 |
+| Muted text on page (`muted` on `bg`) | 4.5:1 | 6.35 | 10.08 |
+| Muted text on reading surface (`muted` on `panel`) | 4.5:1 | 7.16 | 8.88 |
+| Primary button text on twilight / baby-pink (`btn-ink` on `btn`) | 4.5:1 | 11.63 | 8.65 |
+| Approve button text on mint (`leaf-ink` on `leaf`) | 4.5:1 | 10.95 | 9.10 |
+| Olive text on page (`leaf-text` on `bg`) | 4.5:1 | 5.27 | 9.99 |
+| Passage highlight / step number text (`hl-ink` on `hl`) | 4.5:1 | 11.35 | 11.35 |
+| Ink on butter (warning, question, passage target) (`ink` on `butter`) | 4.5:1 | 11.35 | 7.25 |
+| Ink on sky (cite chip) (`ink` on `sky`) | 4.5:1 | 11.34 | 10.99 |
+| Ink on lilac (tag chip, cite hover) (`ink` on `lilac`) | 4.5:1 | 7.44 | 7.79 |
+| Pearl text on twilight (header band) (`pearl` on `twilight`) | 4.5:1 | 11.63 | 17.65 |
+| Baby-pink on twilight (active nav) (`star` on `twilight`) | 4.5:1 | 7.10 | 10.77 |
+| Link candy-wine on surface (`accent` on `panel`) | 4.5:1 | 6.03 | 8.78 |
+| Link candy-wine on page (`accent` on `bg`) | 4.5:1 | 5.35 | 9.97 |
+| Text on blush (user message, selected, passage) (`blush-ink` on `blush`) | 4.5:1 | 8.65 | 8.96 |
+| Body text on blush (nav hover) (`ink` on `blush`) | 4.5:1 | 8.65 | 7.95 |
+| Warning notice (`warn-ink` on `warn-bg`) | 4.5:1 | 11.35 | 8.02 |
+| Error / withheld notice (`bad-ink` on `bad-bg`) | 4.5:1 | 7.03 | 7.91 |
+| OK notice / live chip (`ok-ink` on `ok-bg`) | 4.5:1 | 7.90 | 8.66 |
+| Label: quotation (`quote` on `panel`) | 4.5:1 | 6.03 | 8.78 |
+| Label: interpretation (`interp` on `panel`) | 4.5:1 | 5.94 | 8.80 |
+| Label: synthesis (`synth` on `panel`) | 4.5:1 | 5.99 | 9.34 |
+| Label: fiction (`fiction` on `panel`) | 4.5:1 | 5.95 | 8.17 |
+| Label: app coaching (`coach` on `panel`) | 4.5:1 | 7.16 | 8.88 |
+| Label: limits (`limits` on `panel`) | 4.5:1 | 6.75 | 7.99 |
+| Input / button boundary vs surface (UI 3:1) (`line-strong` on `panel`) | 3.0:1 | 5.39 | 5.86 |
+| Input boundary vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 4.78 | 6.65 |
+| Focus ring vs page (UI 3:1) (`focus` on `bg`) | 3.0:1 | 12.56 | 14.49 |
+| Focus ring vs surface (UI 3:1) (`focus` on `panel`) | 3.0:1 | 14.17 | 12.76 |
+| Outline vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 4.78 | 6.65 |
 
-Only the listed pairs are measured; this does not establish full accessibility, and there was no screen-reader testing. Peony (#E8A8B8) buttons are identified by their 2px ink outline plus text, not by fill contrast. Dark mode is re-derived (dark brown paper, cream ink).
-
-## Verification
-`python scripts/make_screenshots.py` drives the real app (demo provider, SYNTHETIC fixtures approved, temp data dir) at 1280px and 390px, deviceScaleFactor 2, light and dark, and asserts no horizontal scroll. Output in `docs/design/screenshots/`. Not verified: other browsers/OSes, real documents, the owner's taste, live tutoring.
+Only listed pairs are measured; this does not establish full accessibility, and there was no screen-reader testing.
