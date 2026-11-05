@@ -279,7 +279,7 @@ def blk(text, **kw):
 
 def test_surface_checks_flag_the_specified_patterns():
     assert "M_TAS" in kinds(blk("Think of it as thesis and antithesis resolving."))
-    assert "M_TAS" not in kinds(blk("The author's own thesis here is stated as such."), ["The thesis of the pamphlet is X."])
+    assert "M_TAS" in kinds(blk("The author's own thesis here is stated as such."), ["The thesis of the pamphlet is X."])   # a passage with the token does not excuse a use; a human judges
     assert "M_PRAISE" in kinds(blk("Excellent use of dialectical terminology!"))
     assert "M_PRAISE" in kinds(blk("You correctly identified the contradiction."))
     assert "M_PREMATURE" in kinds(blk("This is clearly a dialectical contradiction."))
@@ -353,3 +353,24 @@ def test_c3a_no_longer_teaches_a_categorical_disagreement_is_not_contradiction_p
         assert "needs_investigation" in next(c for c in CASES["cases"] if c["id"] == cid)["provisional_note"]
     tc = " ".join((ROOT / "docs" / "dialectical" / "TEACHING_CONTRACT.md").read_text().split())
     assert "live alternative readings" not in tc and "without assuming in advance" in tc
+
+
+def test_c1b_and_c2a_no_longer_encode_unsupported_premises_and_checks_do_not_flag_the_intended_response():
+    """Provisional corrections after reading the reference texts; not validation of anything."""
+    by = {c["id"]: c for c in CASES["cases"]}
+    for cid in ("C1b", "C2a"):
+        assert "PROVISIONAL" in by[cid]["revision_note"]
+    c1b = json.dumps(by["C1b"]["tutor_should"] + by["C1b"]["tutor_should_not"]).lower()
+    assert "rather than just different" not in c1b and "support in the case record" in c1b
+    assert any("shared by all the authors" in x["text"] for x in by["C1b"]["tutor_should_not"])
+    c2a_should = " ".join(x["text"] for x in by["C2a"]["tutor_should"]).lower()
+    assert "not the vocabulary" in c2a_should and "do not claim the authors reject it" in c2a_should
+    assert any("illegitimate" in x["text"] for x in by["C2a"]["tutor_should_not"])
+    assert "thesis-antithesis" in " ".join(x["text"] for x in by["C2a"]["tutor_should_not"]).lower()
+    assert "not a failure" in CASES["checks"]["M_TAS"] and "quoted" in CASES["checks"]["M_INEV"]
+    # the reply the packet calls successful must not trip the 'inevitably' check; thesis wording is flagged only for human review
+    good = blk("I'd also hold off on “inevitably”: there, necessity is shown from history, not from the label. The passages I have do not present "
+               "thesis–antithesis–synthesis as the method. Which fact in the minutes shows what is opposed to what?", purpose="question")
+    flags = dm.check_output(good, [])
+    assert {f["check"] for f in flags} == {"M_TAS"} and all(f["review"] for f in flags)
+    assert "M_INEV" in kinds(blk("So it will inevitably transcend itself."))                       # an unquoted endorsement is still flagged

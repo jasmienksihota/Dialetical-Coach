@@ -19,7 +19,7 @@ Five concepts in total (not nine): concrete_conditions, relations_interdependenc
 - **Supporting source passages:** PENDING (local probe).
 - **Source-level interpretation:** none proposed; it cannot be derived without reviewed passages.
 - **What remains uncertain:** whether the reviewed passages say anything about these terms or about stage-templates as method; whether the reviewer's wording matches the authors'.
-- **Observable tutor behaviours:** *should* say plainly the response names no case fact and ask what observable facts show which things are opposed and how they affect one another; question "inevitably"; say the supplied passages do not establish the template if they do not (M_LIMITS). *Should not* praise terminology (M_PRAISE), adopt the template (M_TAS), endorse "inevitably" (M_INEV), or ask more than one question (M_ONEQ).
+- **Observable tutor behaviours (REVISED, provisional):** *should* say plainly the response names no case fact and ask what facts it rests on and what shows the relationships it claims; make clear the objection is the missing evidence, not the vocabulary (the reviewed authors treat the unity of opposites as central); question "inevitably"; say the supplied passages do not establish a three-step sequence as a required method, without claiming the authors reject it (M_LIMITS). *Should not* praise terminology (M_PRAISE), treat the vocabulary as illegitimate, adopt a thesis-antithesis-synthesis sequence as required, or endorse "inevitably" (M_TAS and M_INEV only flag wording for a human to judge).
 
 ## C1b — plain language, relationships and change (scenario S1)
 *Invented learner response:* separates what the records show from inference; traces the bridge → Sunday run → vendors' boats and divided interests; says it does not yet know whether the split is about routes or pay shares; keeps "the bridge alone" alive.
@@ -27,7 +27,7 @@ Five concepts in total (not nine): concrete_conditions, relations_interdependenc
 - **Supporting source passages:** PENDING (local probe).
 - **Source-level interpretation:** none proposed.
 - **What remains uncertain:** what, if anything, the reviewed passages say counts as showing opposed aspects; whether the response's relational account matches any author's usage.
-- **Observable tutor behaviours:** *should* acknowledge what is evidenced versus inferred without praising vocabulary, press on what would show the interests are opposed and what would count against it, keep the "bridge alone" alternative live. *Should not* declare a contradiction proven (M_PREMATURE), demand terminology or reward agreement, use a template (M_TAS).
+- **Observable tutor behaviours (REVISED, provisional):** *should* acknowledge what is evidenced versus inferred without praising vocabulary; ask what kind of relationship is claimed between the groups and what would show it or count against it; keep the "bridge alone" reading live, attributing any author's account of external conditions to that author; judge by support in the case record, not resemblance to the authors' framing. *Should not* declare a contradiction proven (M_PREMATURE), demand terminology or reward agreement, or present one author's priority as shared doctrine.
 
 ## C3a — a contradiction proposed without an analysis behind it (scenario S2, tool library) — REVISED, provisional
 *Invented learner response:* "Ana and Ben represent opposed aspects, so their quarrel over hours is the contradiction driving the tool library's development."

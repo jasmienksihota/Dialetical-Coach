@@ -192,6 +192,7 @@ _PREMATURE = re.compile(
     r"(a\s+|the\s+)?(genuine\s+|real\s+|true\s+)?(dialectical\s+)?contradiction\b|"
     r"\b(you(?:'ve| have)\s+(found|identified|proven|shown))\b[^.!?]{0,40}\bcontradiction\b", re.I)
 _HEDGE = re.compile(r"\b(whether|if|unless|show|shows|establish|decide|determine|tell|say|claim|call|test|ask)\s+(or not\s+|that\s+)?$", re.I)
+_QUOTED = re.compile(r'“[^”]*”|"[^"]*"')
 _INEV = re.compile(r"\binevitabl[ey]\b", re.I)
 
 
@@ -201,10 +202,10 @@ def check_output(blocks: list[dict], passage_texts: list[str], *, unresolved_anc
     text_blocks = [b for b in blocks if b.get("type") != "withheld"]
     text = " ".join(b.get("text", "") for b in text_blocks)
     corpus = " ".join(passage_texts).lower()
-    for m in _TAS.finditer(text):
-        if m.group(1).lower() not in corpus:
-            failures.append({"check": "M_TAS", "detail": f"'{m.group(0)}' used but not in any supplied passage"})
-            break
+    m = _TAS.search(text)          # token heuristic: a passage containing the token does NOT make a use acceptable
+    if m:
+        failures.append({"check": "M_TAS", "detail": f"'{m.group(0)}' used: a human must judge whether it treats the sequence as a required method",
+                         "review": True})
     for rx in _PRAISE:
         m = rx.search(text)
         if m:
@@ -216,8 +217,8 @@ def check_output(blocks: list[dict], passage_texts: list[str], *, unresolved_anc
             continue
         failures.append({"check": "M_PREMATURE", "detail": m.group(0)[:80]})
         break
-    if _INEV.search(text):
-        failures.append({"check": "M_INEV", "detail": "uses 'inevitable/inevitably' — review whether endorsed"})
+    if _INEV.search(_QUOTED.sub(" ", text)):          # quoted mentions (e.g. questioning the claim) are ignored
+        failures.append({"check": "M_INEV", "detail": "uses 'inevitable/inevitably' unquoted: review whether endorsed", "review": True})
     if sum(1 for b in text_blocks if b.get("purpose") == "question") > 1:
         failures.append({"check": "M_ONEQ", "detail": "more than one question block"})
     if unresolved_anchor and not any(b.get("type") == "limits" for b in text_blocks):

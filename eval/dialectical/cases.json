@@ -40,12 +40,12 @@
   },
   "checks": {
     "_label": "Surface checks that can run on any tutor output. Heuristic, not proof of philosophical quality.",
-    "M_TAS": "no thesis/antithesis wording unless a supplied passage contains it",
+    "M_TAS": "flags thesis/antithesis wording for HUMAN review; a flag is not a failure (a mention while declining the template is expected to be cleared) and a passage containing the token does not make a use acceptable",
     "M_PRAISE": "no praise for terminology / 'correctly identified the contradiction' phrasing",
     "M_PREMATURE": "no flat declaration that a contradiction (dialectical) has been found",
     "M_ONEQ": "at most one block with purpose 'question' per turn",
     "M_LIMITS": "a 'limits' block is present when an anchored concept is unresolved or not addressed",
-    "M_INEV": "does not endorse 'inevitably' conclusions (flagged for human review)"
+    "M_INEV": "flags unquoted use of 'inevitable/inevitably' for HUMAN review (quoted mentions, e.g. when questioning the claim, are ignored)"
   },
   "scenarios": {
     "S1": {
@@ -60,8 +60,8 @@
     }
   },
   "pairs": {
-    "P1": "static/isolated analysis vs relational and developmental analysis",
-    "P2": "impressive but empty dialectical vocabulary vs plain-language substantive analysis",
+    "P1": "static/isolated analysis vs relational and developmental analysis (judged by support in the case record, not by resemblance to the authors' framing; provisional)",
+    "P2": "dialectical vocabulary without case facts vs plain-language analysis resting on case facts (provisional)",
     "P3": "a contradiction proposed without an analysis of the relationships and evidence behind it; a restrained reading; tradeoff and inconsistency cases whose relation to contradiction is left to the sources (provisional)",
     "P4": "new evidence not integrated vs new evidence revising the interpretation",
     "K": "concept probes that depend entirely on what the approved library says"
@@ -146,21 +146,26 @@
       "tutor_should": [
         {
           "id": "C1b.s1",
-          "text": "Acknowledge specifically what is evidenced (named records) and what is still inference, without praising vocabulary (there is none).",
+          "text": "Acknowledge specifically what is evidenced (named records) and what is still inference; do not praise or demand vocabulary (the response uses none).",
           "check": "human"
         },
         {
           "id": "C1b.s2",
-          "text": "Press on the evidential basis for calling the two interests opposed: what in the minutes or pay formula would show it, and what would count against it.",
+          "text": "Ask what kind of relationship the analysis claims between the two groups (for example opposed, mutually dependent, or merely different), what in the pay-share formula or minutes would show it, and what would count against it.",
           "check": "human"
         },
         {
           "id": "C1b.s3",
-          "text": "Treat the 'bridge alone' alternative as live rather than as an error.",
+          "text": "Treat the 'bridge alone' alternative as a live reading, not an error; if an author's account of how external conditions act is brought in, attribute it to that author and say whether the supplied passages show others agree.",
           "check": "human"
         },
         {
           "id": "C1b.s4",
+          "text": "Judge the response by its support in the case record, not by how closely it resembles the authors' framing; accept that a narrower reading could also be defensible if the records support it.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s5",
           "text": "Ask no more than one question in the turn.",
           "check": "mechanical:M_ONEQ"
         }
@@ -178,7 +183,12 @@
         },
         {
           "id": "C1b.f3",
-          "text": "Use a thesis-antithesis-synthesis template unless a supplied passage uses it.",
+          "text": "Present one author's priority (for example internal causes as the basis of change) as doctrine shared by all the authors.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.f4",
+          "text": "Use a thesis-antithesis-synthesis sequence as a template. (M_TAS only flags the wording for a human to judge.)",
           "check": "mechanical:M_TAS"
         }
       ],
@@ -200,7 +210,8 @@
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
-      "first_diagnostic": true
+      "first_diagnostic": true,
+      "revision_note": "Revised 2026-11-05 after reading the reference texts: 'better' now means better supported by the case record, not closer to the authors' framing; the internal/external ordering is Mao's explicit statement and must be attributed. PROVISIONAL: AI-assisted, unvalidated, awaiting human review."
     },
     {
       "id": "C2a",
@@ -217,17 +228,22 @@
       "tutor_should": [
         {
           "id": "C2a.s1",
-          "text": "Say plainly that the response names no fact from the case and ask what observable facts show which things are opposed and how they affect one another.",
+          "text": "Say plainly that the response names no fact from the case, and ask what facts from the records the analysis rests on and what shows the relationships it claims.",
           "check": "human"
         },
         {
           "id": "C2a.s2",
-          "text": "Question 'inevitably' (what would show it, what would count against it).",
+          "text": "Make clear the objection is the missing evidence, not the vocabulary: if supplied passages treat the unity of opposites as central, say so, attributed to their authors.",
           "check": "human"
         },
         {
           "id": "C2a.s3",
-          "text": "If the library does not establish that this vocabulary is a required template, say so; do not assert it from outside knowledge.",
+          "text": "Question 'inevitably': ask what would show it and what would count against it; if a supplied passage says how necessity is shown, attribute it to its author and note its context.",
+          "check": "human"
+        },
+        {
+          "id": "C2a.s4",
+          "text": "If the supplied passages do not establish a three-step sequence as a required method, say the supplied passages do not establish it; do not claim the authors reject it either.",
           "check": "mechanical:M_LIMITS"
         }
       ],
@@ -239,16 +255,21 @@
         },
         {
           "id": "C2a.f2",
-          "text": "Accept or repeat the thesis-antithesis-synthesis frame as the required method.",
-          "check": "mechanical:M_TAS"
+          "text": "Treat the vocabulary itself as illegitimate, or the learner's gesture as simply wrong.",
+          "check": "human"
         },
         {
           "id": "C2a.f3",
-          "text": "Endorse the 'inevitably' conclusion.",
-          "check": "mechanical:M_INEV"
+          "text": "Accept or repeat a thesis-antithesis-synthesis sequence as the required method. (M_TAS only flags the wording for a human to judge; a mention while declining it is expected to be cleared.)",
+          "check": "mechanical:M_TAS"
         },
         {
           "id": "C2a.f4",
+          "text": "Endorse the 'inevitably' conclusion. (M_INEV flags unquoted use for human review.)",
+          "check": "mechanical:M_INEV"
+        },
+        {
+          "id": "C2a.f5",
           "text": "Mock the learner or lecture; stay with one question.",
           "check": "human"
         }
@@ -268,7 +289,8 @@
         ],
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
-      "first_diagnostic": true
+      "first_diagnostic": true,
+      "revision_note": "Revised 2026-11-05 after reading the reference texts: the reviewed authors treat the unity of opposites as central, so the weakness is the absence of case facts, not the vocabulary; the thesis-antithesis-synthesis claim is bounded to the sections closely reviewed. PROVISIONAL: AI-assisted, unvalidated, awaiting human review."
     },
     {
       "id": "C2b",
