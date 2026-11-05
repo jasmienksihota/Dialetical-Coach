@@ -153,15 +153,16 @@ def _feedback(req):
     skip = () if phase in ("revision", "review") else ("revision",)
     got, miss = _seen_missing(text, skip)
     fb = ("Demo feedback (keyword matching by a script, NOT an evaluation of your thinking). "
-          + ("Visible in your answer: " + "; ".join(got) + ". " if got else "I could not spot any of the rubric features by keyword. ")
-          + ("Not visible yet: " + "; ".join(miss) + ". " if miss else "")
-          + "Absence of a keyword does not mean absence of the idea; say it explicitly if you meant it.")
+          + ("Keyword matches: " + "; ".join(got) + ". " if got else "No rubric keyword matched. ")
+          + ("No keyword match for: " + "; ".join(miss) + ". " if miss else "")
+          + "A keyword match does not show an idea is supported by evidence or even understood, and no match "
+            "does not show it is absent; say explicitly what facts your explanation rests on.")
     if phase in ("revision", "review") and ctx.get("attempts"):
         before = analyse(ctx["attempts"][0])
         now = analyse(text)
         gained = [LABEL[k] for k, _ in RUBRIC if now[k] and not before[k]]
-        fb += (" Compared with your first attempt, newly visible: " + "; ".join(gained) + "."
-               if gained else " Compared with your first attempt, I see no new rubric features by keyword; "
+        fb += (" Compared with your first attempt, newly matched keywords: " + "; ".join(gained) + "."
+               if gained else " Compared with your first attempt, no new rubric keywords matched; "
                "explain explicitly what the new fact changed (or why it changes nothing).")
     anchor = ps[(ctx.get("turn", 0)) % len(ps)]
     blocks = [_coach(fb, "feedback"), _quote(anchor, "feedback"),
@@ -227,8 +228,8 @@ def _reflection(req):
     todo = [LABEL[k] for k, _ in RUBRIC if not union[k]]
     text = (f"Session reflection (demo; keyword-based, not a measure of ability). You made "
             f"{len(attempts)} attempt(s) and used {ctx.get('hints_used', 0)} hint(s). "
-            + ("Features visible somewhere in your answers: " + "; ".join(shown) + ". " if shown else "")
-            + ("Worth practising next time: " + "; ".join(todo) + ". " if todo else "")
+            + ("Keyword matches somewhere in your answers: " + "; ".join(shown) + ". " if shown else "")
+            + ("No keyword match for: " + "; ".join(todo) + ". " if todo else "")
             + RUBRIC_NOTE)
     return {"blocks": [_coach(text, "reflection"), _quote(ps[0], "reflection"),
                        _coach("One thing to try next: pick a single claim from your last answer and "

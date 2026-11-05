@@ -241,6 +241,6 @@ def test_feedback_is_qualitative_labeled_and_sources_are_checkable(env):
     c = act(env, cid, "answer", ANSWER).json()["conversation"]
     fb = [b for b in last_ai(c)["blocks"] if b.get("purpose") == "feedback"]
     text = " ".join(b["text"] for b in fb)
-    assert "NOT an evaluation" in text and "Visible in your answer" in text
+    assert "NOT an evaluation" in text and "Keyword matches" in text and "does not show an idea is supported" in text
     assert not any(ch in text for ch in ("/10", "%", "IQ"))
     assert any(b["type"] == "quote" and b["status"] == "verified" for b in fb)    # source-supported feedback

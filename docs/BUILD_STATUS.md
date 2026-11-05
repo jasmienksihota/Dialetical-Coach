@@ -68,3 +68,20 @@ real-document checks. Only fixes for defects those checks reveal should be made.
 
 ## Remaining
 Scope editing UI for existing chats; streaming; exercise history view; the items above.
+
+## Dialectical-materialism milestone — design stage (branch `claude/dm-concepts-eval`, from `228563b`)
+Core requirement: the app must support learning and practising dialectical materialism from the owner's approved sources.
+**Not achieved, not claimed.** What exists:
+- `docs/dialectical/AUDIT.md` — inspection of the workflow and prompts (8 findings, e.g. app-authored theory baked into `modes.py`; generic rubric; authorship not sent to the model; scripted demo cannot tell jargon from reasoning).
+- `eval/dialectical/concept_map.json` + `docs/dialectical/CONCEPT_MAP.md` — a **skeleton of questions for the library with NO passages and no claims about any author**. Every concept is `unsupported`. Real passages can only come from the owner's approved library via `tools/dm_eval.py probe` (read-only) and the owner's own confirmation file.
+- `eval/dialectical/cases.json` — 13 INVENTED cases in the requested pairs (static vs relational; empty vocabulary vs plain substance; contradiction not yet justified + tradeoff/inconsistency look-alikes; new evidence revision; 3 concept probes incl. Cartesian dualism), with observable `tutor_should` / `tutor_should_not` criteria, an app-created qualitative rubric, `owner_review: pending`.
+- `docs/dialectical/PROMPT_CHANGES.md` — 7 proposed prompt/rubric changes, **proposed and not applied** (except P7).
+- `tools/dm_eval.py` — `probe`, `readiness`, `baseline`, `check` (offline; no API).
+- Applied: scripted demo feedback no longer says "Visible in your answer"; it says keyword matches do not show support.
+
+Tests run on this branch: `pytest -q --ignore=tests/e2e` **260 passed** (20 new contract tests in `tests/test_dm_eval_contract.py`); `pytest -q tests/e2e` **3 passed**.
+Observed: `tools/dm_eval.py baseline` — the demo's keyword matcher matched the empty-jargon response and the premature-"contradiction" responses but nothing in the best-supported revision (C4b). Readiness today: **0/13** cases traceable to confirmed passages.
+
+**Verified (contract level only):** the materials parse, are labelled invented/app-created, have observable criteria, contain no source text; the probe is read-only and approved-primary-only; readiness rejects unapproved/missing/secondary/unannotated passages; surface checks behave as specified.
+**NOT verified:** that any model, with any proposed prompt, reasons dialectically, withholds "contradiction" when unjustified, keeps authors apart, or admits insufficient evidence; any real passage; the owner's judgement of the cases. No live call was made; no model was retrained; no documents were downloaded, imported or approved.
+**Needs the owner:** run `probe` against the approved library, confirm/mark concepts, review and edit the cases, decide which prompt changes to adopt; then a live evaluation (spend limit + human blind rating).

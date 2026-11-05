@@ -1,0 +1,280 @@
+"""CONTRACT tests for the dialectical-materialism concept map and evaluation set.
+
+These verify the STRUCTURE and HONESTY of the materials and the behaviour of the offline tooling, using only the
+SYNTHETIC fixtures. They do NOT test whether any model reasons dialectically: that is untested (see
+docs/dialectical/EVALUATION.md). Passing here must never be described as achieving the learning goal.
+"""
+import hashlib
+import importlib.util
+import json
+import re
+import sqlite3
+
+import pytest
+
+from conftest import ROOT
+
+spec = importlib.util.spec_from_file_location("dm_eval", ROOT / "tools" / "dm_eval.py")
+dm = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(dm)
+
+CMAP = dm.load_map()
+CASES = dm.load_cases()
+CONCEPT_IDS = {c["id"] for c in CMAP["concepts"]}
+REAL_NAMES = re.compile(r"\b(Marx|Engels|Lenin|Mao|Stalin|Hegel|Plekhanov|Gramsci|Trotsky)\b", re.I)
+
+
+# ------------------------------------------------------------------ concept map
+def test_concept_map_is_a_labelled_skeleton_with_no_source_text():
+    assert "NO source passages" in CMAP["_label"] and "NO claim" in CMAP["_label"]
+    for c in CMAP["concepts"]:
+        assert c["support"] == {"status": "unsupported", "passages": []}, c["id"]
+        assert c["question_for_the_library"].endswith("?") and c["search_term_groups"] and c["app_framing_question"]
+        assert not ({"quote", "text", "excerpt"} & set(c["support"]))
+    assert "opposed aspects of one process" not in json.dumps(CMAP)           # no embedded definition of contradiction
+
+
+def test_concept_map_covers_the_required_distinctions():
+    assert {"materialism_idealism", "dialectical_vs_metaphysical_method", "cartesian_mind_body_dualism",
+            "contradiction_and_lookalikes", "concrete_conditions", "relations_interdependence",
+            "change_development_history", "evidence_for_opposed_aspects", "author_differences"} <= CONCEPT_IDS
+    node = next(c for c in CMAP["concepts"] if c["id"] == "contradiction_and_lookalikes")
+    assert set(node["teaching_comparators"]) == {"disagreement", "practical_tradeoff", "logical_inconsistency"}
+    for c in CMAP["concepts"]:
+        assert set(c["must_not_be_conflated_with"]) <= CONCEPT_IDS
+    dual = next(c for c in CMAP["concepts"] if c["id"] == "cartesian_mind_body_dualism")
+    assert {"materialism_idealism", "dialectical_vs_metaphysical_method"} <= set(dual["must_not_be_conflated_with"])
+    assert "do not fill the gap from outside" in dual["app_framing_question"].lower()
+
+
+# ------------------------------------------------------------------ cases
+def test_every_case_is_labelled_invented_and_owner_review_is_pending():
+    assert "INVENTED" in CASES["_label"] and "owner" in CASES["_review_note"].lower()
+    assert "app-created" in CASES["rubric"]["_label"].lower() and "no scores" in CASES["rubric"]["_label"].lower()
+    for s in CASES["scenarios"].values():
+        assert "INVENTED" in s["label"]
+    for c in CASES["cases"]:
+        assert "INVENTED" in c["label"] and c["owner_review"] == "pending"
+        assert c["source_traceability"]["status"] == "pending"
+        assert set(c["source_traceability"]["depends_on_concepts"]) == set(c["anchors"]) <= CONCEPT_IDS
+
+
+def test_the_five_requested_example_types_exist_in_pairs():
+    kinds = {c["kind"] for c in CASES["cases"]}
+    assert {"static_isolated_analysis", "relational_developmental_analysis", "empty_dialectical_vocabulary",
+            "contradiction_claimed_not_yet_justified", "new_evidence_revision"} <= kinds
+    by_pair = {}
+    for c in CASES["cases"]:
+        by_pair.setdefault(c["pair"], []).append(c["id"])
+    for pair in ("P1", "P2", "P3", "P4"):
+        assert len(by_pair[pair]) >= 2, pair
+    assert {c["kind"] for c in CASES["cases"] if c["pair"] == "P3"} >= {
+        "practical_tradeoff_mislabelled", "logical_inconsistency_mislabelled", "restrained_appropriately"}
+    revising = [c for c in CASES["cases"] if c["pair"] == "P4"]
+    assert all(c.get("new_fact") and "INVENTED" in c["new_fact"] for c in revising)
+
+
+def test_every_case_has_observable_criteria_with_valid_check_types():
+    registry = set(CASES["checks"]) - {"_label"}
+    for c in CASES["cases"]:
+        assert c["tutor_should"] and c["tutor_should_not"], c["id"]
+        for crit in c["tutor_should"] + c["tutor_should_not"]:
+            kind, _, name = crit["check"].partition(":")
+            assert kind in ("human", "mechanical") and (kind == "human" or name in registry), crit
+            assert crit["text"].strip() and crit["id"].startswith(c["id"])
+        assert any(x["check"] == "human" for x in c["tutor_should"] + c["tutor_should_not"]), c["id"]
+    dims = {d["id"] for d in CASES["rubric"]["dimensions"]}
+    assert all(set(c["rubric_focus"]) <= dims for c in CASES["cases"])
+
+
+def test_no_case_mandates_a_template_or_rewards_vocabulary_or_agreement():
+    for c in CASES["cases"]:
+        for crit in c["tutor_should"]:
+            assert not re.search(r"thesis|antithesis|use (the|any) (technical )?term", crit["text"], re.I), crit
+    for cid in ("C2a", "C2b", "C3b", "C4b"):
+        case = next(c for c in CASES["cases"] if c["id"] == cid)
+        assert any(x["check"] == "mechanical:M_PRAISE" for x in case["tutor_should_not"]), cid
+    c2a = next(c for c in CASES["cases"] if c["id"] == "C2a")
+    assert any("M_TAS" in x["check"] for x in c2a["tutor_should_not"]) and any("M_INEV" in x["check"] for x in c2a["tutor_should_not"])
+
+
+def test_real_thinkers_are_not_attributed_anything_in_invented_material():
+    for c in CASES["cases"]:
+        blob = json.dumps([c["learner_input"], c.get("new_fact", ""), c.get("prior_interpretation", "")])
+        assert not REAL_NAMES.search(blob), c["id"]
+        if "Descartes" in blob:
+            assert c["kind"] == "concept_probe_cartesian_dualism"           # a topic to test, with no claims attached
+    for s in CASES["scenarios"].values():
+        assert not REAL_NAMES.search(s["text"]) and "Descartes" not in s["text"]
+
+
+def test_probe_cases_require_a_limits_statement_when_library_is_silent():
+    for cid in ("K1", "K2", "K3"):
+        case = next(c for c in CASES["cases"] if c["id"] == cid)
+        assert any(x["check"] == "mechanical:M_LIMITS" for x in case["tutor_should"]), cid
+        assert any("outside" in x["text"].lower() or "without a cited passage" in x["text"].lower()
+                   for x in case["tutor_should"] + case["tutor_should_not"]), cid
+
+
+# ------------------------------------------------------------------ docs stay honest
+def test_documents_state_status_and_limits_plainly():
+    d = ROOT / "docs" / "dialectical"
+    audit, prompts_doc, ev = (" ".join((d / n).read_text().split()) for n in ("AUDIT.md", "PROMPT_CHANGES.md", "EVALUATION.md"))
+    assert "No real approved library exists in this workspace" in audit
+    assert "PROPOSED, not applied" in prompts_doc
+    assert "Philosophical performance is untested" in ev and "No model was retrained" in ev
+    assert "never** sufficient" in ev and "0/13" in ev
+
+
+def test_proposals_are_not_silently_applied():
+    """If P2 is adopted, update PROMPT_CHANGES.md and this test together."""
+    from app import modes, prompts
+    assert "DIALECTICAL-MATERIALISM PRACTICE" not in prompts.EXERCISE_RULES
+    assert "DIALECTICAL-MATERIALISM PRACTICE" in (ROOT / "docs" / "dialectical" / "PROMPT_CHANGES.md").read_text()
+    assert "relationships and tensions inside a situation" in modes.MODES["dialectical"]["guidance"]   # F1 still open
+
+
+# ------------------------------------------------------------------ probe: read-only, approved primary only
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_probe_is_read_only_and_uses_only_approved_primary_documents(env):
+    env.client.post(f"/api/documents/{env.ids['notes']}/approval", json={"approved": True})   # approved but SECONDARY
+    db = env.settings.db_path
+    before = sha(db)
+    conn = dm.open_readonly(env.settings.data_dir)
+    found = dm.probe(conn, CMAP, per_group=4)
+    with pytest.raises(sqlite3.OperationalError):
+        conn.execute("UPDATE documents SET approved=0")                       # truly read-only
+    conn.close()
+    assert sha(db) == before                                                  # nothing written
+    cands = [x for v in found.values() for x in v]
+    assert cands
+    titles = {x["doc_title"] for x in cands}
+    assert titles <= {"synthetic_a_mill_town_notes", "synthetic_b_workshop_handbook", "synthetic_c_harbour_primer"}
+    assert "synthetic_injection_notes" not in titles and "synthetic_secondary_notes" not in titles
+    assert all("approved" not in x for x in cands)                            # carries no verdict
+    sheet = dm.render_review(CMAP, found)
+    assert "app has not judged" in sheet and "candidates only" in sheet.lower()
+
+
+def test_probe_reports_concepts_the_library_may_not_address(env):
+    conn = dm.open_readonly(env.settings.data_dir)
+    found = dm.probe(conn, CMAP)
+    assert found["cartesian_mind_body_dualism"] == []                         # synthetic library never mentions it
+    assert "No candidate passages found" in dm.render_review(CMAP, found)
+
+
+# ------------------------------------------------------------------ readiness / traceability
+def chunk_ids(env, key, n=1):
+    with env.svc.db.tx() as c:
+        return [r["id"] for r in c.execute("SELECT id FROM chunks WHERE doc_id=? ORDER BY ordinal LIMIT ?", (env.ids[key], n))]
+
+
+def test_nothing_is_ready_without_owner_confirmations(env):
+    conn = dm.open_readonly(env.settings.data_dir)
+    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {}})
+    assert rep["ready_count"] == 0 and rep["total"] == 13
+    assert dm.main(["readiness", "--data-dir", str(env.settings.data_dir)]) == 1
+
+
+def test_readiness_accepts_only_valid_confirmations(env):
+    """Uses SYNTHETIC passages purely to exercise the machinery; this says nothing about any real text."""
+    ok = chunk_ids(env, "mill")[0]
+    inject = chunk_ids(env, "inject")[0]                                       # unapproved document
+    conn = dm.open_readonly(env.settings.data_dir)
+    conf = {"concepts": {
+        "concrete_conditions": {"status": "confirmed", "passages": [{"chunk_id": ok, "author": "synthetic", "note": "my words"}]},
+        "relations_interdependence": {"status": "confirmed", "passages": [{"chunk_id": ok, "note": "my words"}]},
+        "change_development_history": {"status": "not_addressed"},
+        "evidence_for_opposed_aspects": {"status": "confirmed", "passages": [{"chunk_id": inject, "note": "x"}]},
+        "materialism_idealism": {"status": "confirmed", "passages": []},
+        "dialectical_vs_metaphysical_method": {"status": "confirmed", "passages": [{"chunk_id": "nope-0001", "note": "x"}]},
+        "author_differences": {"status": "confirmed", "passages": [{"chunk_id": ok}]},
+        "not_a_concept": {"status": "confirmed"},
+        "cartesian_mind_body_dualism": {"status": "maybe"},
+    }}
+    rep = dm.readiness(conn, CMAP, CASES, conf)
+    st = rep["concept_status"]
+    assert st["concrete_conditions"] == "confirmed" and st["change_development_history"] == "not_addressed"
+    for bad in ("evidence_for_opposed_aspects", "materialism_idealism", "dialectical_vs_metaphysical_method",
+                "author_differences", "cartesian_mind_body_dualism"):
+        assert st[bad] == "unresolved", bad
+    problems = " | ".join(rep["problems"])
+    for needle in ("UNAPPROVED", "lists no passages", "does not exist", "no note in your own words", "not a concept", "status must be"):
+        assert needle in problems, needle
+    ready = {r["case"] for r in rep["cases"] if r["ready"]}
+    assert ready == set() or ready <= {"C1a"}
+    assert "C1a" in ready and "C1b" not in ready                                 # C1b also needs the (invalid) evidence concept
+
+
+def test_secondary_notes_cannot_confirm_a_concept(env):
+    env.client.post(f"/api/documents/{env.ids['notes']}/approval", json={"approved": True})
+    sec = chunk_ids(env, "notes")[0]
+    conn = dm.open_readonly(env.settings.data_dir)
+    rep = dm.readiness(conn, CMAP, CASES, {"concepts": {"concrete_conditions": {"status": "confirmed",
+                       "passages": [{"chunk_id": sec, "note": "x"}]}}})
+    assert rep["concept_status"]["concrete_conditions"] == "unresolved" and "secondary notes" in " ".join(rep["problems"])
+
+
+# ------------------------------------------------------------------ surface checks
+P = ["The workshop handbook says investigate the facts first."]
+
+
+def kinds(blocks, passages=P, **kw):
+    return {f["check"] for f in dm.check_output(blocks, passages, **kw)}
+
+
+def blk(text, **kw):
+    return [{"type": kw.pop("type", "coaching"), "text": text, **kw}]
+
+
+def test_surface_checks_flag_the_specified_patterns():
+    assert "M_TAS" in kinds(blk("Think of it as thesis and antithesis resolving."))
+    assert "M_TAS" not in kinds(blk("The author's own thesis here is stated as such."), ["The thesis of the pamphlet is X."])
+    assert "M_PRAISE" in kinds(blk("Excellent use of dialectical terminology!"))
+    assert "M_PRAISE" in kinds(blk("You correctly identified the contradiction."))
+    assert "M_PREMATURE" in kinds(blk("This is clearly a dialectical contradiction."))
+    assert "M_PREMATURE" in kinds(blk("You have found the contradiction."))
+    assert "M_INEV" in kinds(blk("So it will inevitably transcend itself."))
+    assert "M_ONEQ" in kinds([{"type": "coaching", "text": "A?", "purpose": "question"}, {"type": "coaching", "text": "B?", "purpose": "question"}])
+    assert "M_LIMITS" in kinds(blk("Here is an answer."), unresolved_anchor=True)
+    assert "M_LIMITS" not in kinds(blk("Not established.", type="limits"), unresolved_anchor=True)
+
+
+def test_surface_checks_do_not_flag_ordinary_investigative_replies():
+    ok = blk("The records show a disagreement about hours. What would show that the two positions depend on each other?",
+             purpose="question")
+    assert kinds(ok) == set()
+    assert kinds(blk("I can't say yet whether this is a contradiction; what would count against it?")) == set()
+    assert kinds(blk("What would show that this is a contradiction rather than a scheduling dispute?")) == set()
+    assert "M_PREMATURE" in kinds(blk("Whether or not you agree, this is a contradiction."))      # declaration after a hedge-free clause
+    assert kinds([{"type": "withheld", "text": "thesis antithesis inevitably"}]) == set()       # withheld text is not shown
+
+
+def test_check_cli_reports_failures(tmp_path, capsys):
+    f = tmp_path / "reply.json"
+    f.write_text(json.dumps({"blocks": blk("Great use of terminology; this is a contradiction.")}))
+    assert dm.main(["check", str(f)]) == 1
+    assert "M_PRAISE" in capsys.readouterr().out
+
+
+# ------------------------------------------------------------------ the scripted demo's limits, documented not hidden
+def test_scripted_demo_keyword_baseline_cannot_discriminate_the_cases():
+    base = dm.baseline(CASES)
+    assert base["C2a"]["keyword_features_matched"]                              # empty vocabulary matches keywords
+    assert base["C4b"]["keyword_features_matched"] == []                        # best-supported revision matches none
+    # so the demo must never present keyword matches as evidence of understanding:
+    from app import demo_script
+    assert "Visible in your answer" not in open(demo_script.__file__).read()
+
+
+def test_demo_feedback_wording_does_not_treat_keywords_as_support(env):
+    env.client.post("/api/exercises", json={})
+    cid = env.client.get("/api/conversations").json()[0]["id"]
+    case = next(c for c in CASES["cases"] if c["id"] == "C2a")
+    r = env.client.post(f"/api/conversations/{cid}/exercise", json={"action": "answer", "text": case["learner_input"]}).json()
+    msgs = [m for m in r["conversation"]["messages"] if m["role"] == "assistant"]
+    text = " ".join(b["text"] for b in msgs[-1]["blocks"])
+    assert "Keyword matches" in text and "does not show an idea is supported" in text and "Visible in your answer" not in text

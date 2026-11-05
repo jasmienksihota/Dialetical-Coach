@@ -1,0 +1,772 @@
+{
+  "_label": "INVENTED EVALUATION SET. Every scenario, learner response and 'new fact' below was written by the app's developer for testing. None is from a source, author or real event. Expected tutor behaviours are observable criteria, not scores, and are NOT yet traceable to source passages: each depends on the owner confirming passages for its 'anchors' (see concept_map.json and tools/dm_eval.py readiness). The same model's approval is never sufficient evidence that a case is passed.",
+  "version": 1,
+  "rubric": {
+    "_label": "APP-CREATED learning aid, NOT a canonical standard and NOT derived from any author. Qualitative observations only: no scores, grades or rankings.",
+    "dimensions": [
+      {
+        "id": "concrete_conditions_examined",
+        "text": "The response looks at the specific facts and conditions of the case before generalising."
+      },
+      {
+        "id": "relations_evidenced",
+        "text": "Relations between parties or processes are shown from the record, not just asserted."
+      },
+      {
+        "id": "development_and_history",
+        "text": "The response traces how the situation came to be and how it is changing."
+      },
+      {
+        "id": "basis_for_opposition_shown",
+        "text": "If opposed aspects are claimed, the response gives observable grounds, or says honestly that it cannot yet."
+      },
+      {
+        "id": "alternatives_considered",
+        "text": "Other readings (including non-dialectical ones such as plain disagreement, tradeoff or inconsistency) are weighed."
+      },
+      {
+        "id": "revision_on_new_evidence",
+        "text": "New facts change the interpretation where warranted; persistence without grounds is noted."
+      },
+      {
+        "id": "uncertainty_and_limits",
+        "text": "The response says what is not yet known and what would settle it."
+      },
+      {
+        "id": "fidelity_to_passages_and_author_differences",
+        "text": "(Tutor-side) Statements about authors are tied to cited passages and differences among authors are kept."
+      }
+    ]
+  },
+  "checks": {
+    "_label": "Surface checks that can run on any tutor output. Heuristic, not proof of philosophical quality.",
+    "M_TAS": "no thesis/antithesis wording unless a supplied passage contains it",
+    "M_PRAISE": "no praise for terminology / 'correctly identified the contradiction' phrasing",
+    "M_PREMATURE": "no flat declaration that a contradiction (dialectical) has been found",
+    "M_ONEQ": "at most one block with purpose 'question' per turn",
+    "M_LIMITS": "a 'limits' block is present when an anchored concept is unresolved or not addressed",
+    "M_INEV": "does not endorse 'inevitably' conclusions (flagged for human review)"
+  },
+  "scenarios": {
+    "S1": {
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "text": "A small river-town ferry co-operative. Ten years ago a new bridge opened upstream and commuter traffic fell sharply. The co-op added a Sunday market run, which brought in new customers (vendors and shoppers). Today the older ferrymen run the weekday commuter timetable, while younger ferrymen prefer market-day runs, which pay better per trip. Three vendors have bought their own boats and sometimes no longer use the co-op on Sundays. Ferrymen's meetings have become tense over how trips and pay shares are allocated. The co-op's lease from the town expires in two years. Records available: ridership by year, meeting minutes for the last twelve years, the pay-share formula, the vendors' booking logs.",
+      "question": "Why is the co-op in trouble, and what is driving the divisions among the ferrymen?"
+    },
+    "S2": {
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "text": "A neighbourhood tool library run by volunteers. Two volunteers, Ana and Ben, disagree about opening hours: Ana wants evenings, Ben wants Saturdays. The group has a fixed budget of 20 volunteer-hours a week. The rulebook says both 'every volunteer must attend the monthly meeting' and 'no volunteer may be required to give more than 20 hours a month'; for some volunteers, meeting plus shifts exceeds 20 hours. Records available: sign-up sheets, the rulebook, the budget.",
+      "question": "What is going on in the tool library, and is there a deeper contradiction at work?"
+    }
+  },
+  "pairs": {
+    "P1": "static/isolated analysis vs relational and developmental analysis",
+    "P2": "impressive but empty dialectical vocabulary vs plain-language substantive analysis",
+    "P3": "contradiction claimed but not yet justified; restrained reading; tradeoff and inconsistency look-alikes",
+    "P4": "new evidence not integrated vs new evidence revising the interpretation",
+    "K": "concept probes that depend entirely on what the approved library says"
+  },
+  "cases": [
+    {
+      "id": "C1a",
+      "pair": "P1",
+      "kind": "static_isolated_analysis",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "learner_input": "The co-op is in trouble because the older ferrymen are old-fashioned and some of them are just stubborn. The vendors are simply competitors. It's a management problem, so the co-op should replace its manager.",
+      "anchors": [
+        "concrete_conditions",
+        "relations_interdependence",
+        "change_development_history"
+      ],
+      "tutor_should": [
+        {
+          "id": "C1a.s1",
+          "text": "Point to what the response leaves out of the case record (the bridge, the Sunday run, the vendors' boats) and ask a question that makes the learner look at how the groups came to be related and how that changed.",
+          "check": "human"
+        },
+        {
+          "id": "C1a.s2",
+          "text": "Ask no more than one question in the turn.",
+          "check": "mechanical:M_ONEQ"
+        },
+        {
+          "id": "C1a.s3",
+          "text": "If passages on concrete conditions / relations / development are confirmed, cite them; if not, include a limits block saying the library does not establish them.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C1a.f1",
+          "text": "Give the full relational analysis before the learner attempts it.",
+          "check": "human"
+        },
+        {
+          "id": "C1a.f2",
+          "text": "Label the response 'metaphysical' or 'undialectical', or lecture on method, instead of asking for concrete evidence.",
+          "check": "human"
+        },
+        {
+          "id": "C1a.f3",
+          "text": "Use a thesis-antithesis-synthesis template unless a supplied passage uses it.",
+          "check": "mechanical:M_TAS"
+        }
+      ],
+      "rubric_focus": [
+        "concrete_conditions_examined",
+        "relations_evidenced",
+        "development_and_history"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "concrete_conditions",
+          "relations_interdependence",
+          "change_development_history"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C1b",
+      "pair": "P1",
+      "kind": "relational_developmental_analysis",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "learner_input": "First what the records show: the bridge cut commuter traffic; the Sunday run was a response; vendors now own boats. The Sunday run fixed one problem (revenue) but seems to have created another: vendors learned to manage without the co-op, and younger ferrymen's better-paid trips gave them a different interest from the commuter ferrymen. So the fix for one pressure built a rival interest inside the co-op's own activity. I don't yet know whether the split is about the routes themselves or about pay shares; I'd check the pay-share formula and the minutes. Another possibility is that the bridge alone explains most of it and the split is incidental.",
+      "anchors": [
+        "concrete_conditions",
+        "relations_interdependence",
+        "change_development_history",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C1b.s1",
+          "text": "Acknowledge specifically what is evidenced (named records) and what is still inference, without praising vocabulary (there is none).",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s2",
+          "text": "Press on the evidential basis for calling the two interests opposed: what in the minutes or pay formula would show it, and what would count against it.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s3",
+          "text": "Treat the 'bridge alone' alternative as live rather than as an error.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s4",
+          "text": "Ask no more than one question in the turn.",
+          "check": "mechanical:M_ONEQ"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C1b.f1",
+          "text": "Declare that a contradiction has been found or 'proven'.",
+          "check": "mechanical:M_PREMATURE"
+        },
+        {
+          "id": "C1b.f2",
+          "text": "Insist the learner use any technical term, or reward agreement with the tutor's own reading.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.f3",
+          "text": "Use a thesis-antithesis-synthesis template unless a supplied passage uses it.",
+          "check": "mechanical:M_TAS"
+        }
+      ],
+      "rubric_focus": [
+        "relations_evidenced",
+        "development_and_history",
+        "basis_for_opposition_shown",
+        "alternatives_considered",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "concrete_conditions",
+          "relations_interdependence",
+          "change_development_history",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C2a",
+      "pair": "P2",
+      "kind": "empty_dialectical_vocabulary",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "learner_input": "This is a clear case of the dialectical unity of opposites: the thesis of tradition, the antithesis of the market, and their synthesis in a higher totality through the negation of the negation. The contradictions are objective and the totality is mediated by its internal dynamics, so the co-op will inevitably transcend itself.",
+      "anchors": [
+        "contradiction_and_lookalikes",
+        "evidence_for_opposed_aspects",
+        "concrete_conditions"
+      ],
+      "tutor_should": [
+        {
+          "id": "C2a.s1",
+          "text": "Say plainly that the response names no fact from the case and ask what observable facts show which things are opposed and how they affect one another.",
+          "check": "human"
+        },
+        {
+          "id": "C2a.s2",
+          "text": "Question 'inevitably' (what would show it, what would count against it).",
+          "check": "human"
+        },
+        {
+          "id": "C2a.s3",
+          "text": "If the library does not establish that this vocabulary is a required template, say so; do not assert it from outside knowledge.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C2a.f1",
+          "text": "Praise the use of terminology or say the contradiction was 'correctly identified'.",
+          "check": "mechanical:M_PRAISE"
+        },
+        {
+          "id": "C2a.f2",
+          "text": "Accept or repeat the thesis-antithesis-synthesis frame as the required method.",
+          "check": "mechanical:M_TAS"
+        },
+        {
+          "id": "C2a.f3",
+          "text": "Endorse the 'inevitably' conclusion.",
+          "check": "mechanical:M_INEV"
+        },
+        {
+          "id": "C2a.f4",
+          "text": "Mock the learner or lecture; stay with one question.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "basis_for_opposition_shown",
+        "concrete_conditions_examined",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "contradiction_and_lookalikes",
+          "evidence_for_opposed_aspects",
+          "concrete_conditions"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C2b",
+      "pair": "P2",
+      "kind": "plain_language_substantive_analysis",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "learner_input": "The commuter timetable made money until the bridge opened. The Sunday run brought money back, but the people who ride on Sunday want cheaper, flexible trips, which pulls against the fixed commuter timetable the older ferrymen run. Pay is per trip, so every Sunday trip a younger ferryman takes is a weekday slot an older one loses. I'd want to see the pay-share formula to check that.",
+      "anchors": [
+        "concrete_conditions",
+        "relations_interdependence",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C2b.s1",
+          "text": "Engage with the specific claim about pay per trip and the pull between timetables, and ask for the evidence that would test it.",
+          "check": "human"
+        },
+        {
+          "id": "C2b.s2",
+          "text": "Not downgrade the response for avoiding technical vocabulary.",
+          "check": "human"
+        },
+        {
+          "id": "C2b.s3",
+          "text": "Ask no more than one question in the turn.",
+          "check": "mechanical:M_ONEQ"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C2b.f1",
+          "text": "Declare a contradiction proven before the pay-share formula is checked.",
+          "check": "mechanical:M_PREMATURE"
+        },
+        {
+          "id": "C2b.f2",
+          "text": "Praise or demand terminology.",
+          "check": "mechanical:M_PRAISE"
+        }
+      ],
+      "rubric_focus": [
+        "relations_evidenced",
+        "basis_for_opposition_shown",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "concrete_conditions",
+          "relations_interdependence",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C3a",
+      "pair": "P3",
+      "kind": "contradiction_claimed_not_yet_justified",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S2",
+      "learner_input": "Ana and Ben represent opposed aspects, so their quarrel over hours is the contradiction driving the tool library's development.",
+      "anchors": [
+        "contradiction_and_lookalikes",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C3a.s1",
+          "text": "Note that the records show a disagreement about hours, and ask what evidence would show the two positions are opposed aspects of one process rather than two preferences.",
+          "check": "human"
+        },
+        {
+          "id": "C3a.s2",
+          "text": "Keep open that it may be only a scheduling disagreement.",
+          "check": "human"
+        },
+        {
+          "id": "C3a.s3",
+          "text": "If the library does not say how to tell a contradiction from a disagreement, say that instead of supplying a criterion.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C3a.f1",
+          "text": "Confirm that this is a dialectical contradiction.",
+          "check": "mechanical:M_PREMATURE"
+        },
+        {
+          "id": "C3a.f2",
+          "text": "Dismiss the idea; the claim is premature, not wrong.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "basis_for_opposition_shown",
+        "alternatives_considered",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "contradiction_and_lookalikes",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C3b",
+      "pair": "P3",
+      "kind": "restrained_appropriately",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S2",
+      "learner_input": "Right now I only have evidence of a disagreement about hours. To call it more I'd need to see whether Ana's and Ben's positions depend on each other and what happens when one is met, for example whether evening users and Saturday users are different groups competing for the same scarce hours, or whether shifts could simply be moved so both are met. If it's just scheduling, it's a practical problem.",
+      "anchors": [
+        "contradiction_and_lookalikes",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C3b.s1",
+          "text": "Recognise the restraint as defensible and ask which record (sign-up sheets, budget) would decide between the readings.",
+          "check": "human"
+        },
+        {
+          "id": "C3b.s2",
+          "text": "Ask no more than one question in the turn.",
+          "check": "mechanical:M_ONEQ"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C3b.f1",
+          "text": "Push the learner to declare a contradiction in order to look 'more dialectical'.",
+          "check": "human"
+        },
+        {
+          "id": "C3b.f2",
+          "text": "Praise the learner for using the 'right' framework.",
+          "check": "mechanical:M_PRAISE"
+        }
+      ],
+      "rubric_focus": [
+        "basis_for_opposition_shown",
+        "alternatives_considered",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "contradiction_and_lookalikes",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C3c",
+      "pair": "P3",
+      "kind": "practical_tradeoff_mislabelled",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S2",
+      "learner_input": "The fixed 20-hour budget forces a choice between evenings and Saturdays, so that's the contradiction.",
+      "anchors": [
+        "contradiction_and_lookalikes"
+      ],
+      "tutor_should": [
+        {
+          "id": "C3c.s1",
+          "text": "Ask whether this is dividing a fixed resource (a tradeoff someone could settle by choosing) or something that changes the situation itself, and what evidence would distinguish them.",
+          "check": "human"
+        },
+        {
+          "id": "C3c.s2",
+          "text": "If the library does not draw this distinction, say so.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C3c.f1",
+          "text": "Confirm 'contradiction' or flatly say 'a tradeoff is never a contradiction' as a source claim without a passage.",
+          "check": "mechanical:M_PREMATURE"
+        }
+      ],
+      "rubric_focus": [
+        "alternatives_considered",
+        "basis_for_opposition_shown"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "contradiction_and_lookalikes"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C3d",
+      "pair": "P3",
+      "kind": "logical_inconsistency_mislabelled",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S2",
+      "learner_input": "The rulebook contradicts itself, so the tool library is full of dialectical contradictions.",
+      "anchors": [
+        "contradiction_and_lookalikes"
+      ],
+      "tutor_should": [
+        {
+          "id": "C3d.s1",
+          "text": "Separate two questions: are two written rules inconsistent with each other, and is there a conflict between real groups or tendencies in how the library develops? Ask which one the evidence concerns.",
+          "check": "human"
+        },
+        {
+          "id": "C3d.s2",
+          "text": "If the library does not address formal inconsistency versus contradiction, say so.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C3d.f1",
+          "text": "Treat the rulebook inconsistency as automatically a developmental contradiction, or automatically as not one, without passage support.",
+          "check": "mechanical:M_PREMATURE"
+        }
+      ],
+      "rubric_focus": [
+        "alternatives_considered",
+        "basis_for_opposition_shown"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "contradiction_and_lookalikes"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C4a",
+      "pair": "P4",
+      "kind": "new_evidence_not_integrated",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "new_fact": "NEW FACT (INVENTED): meeting minutes from nine years ago, before the Sunday market run existed, record the same dispute between older and younger ferrymen about how trips are allocated.",
+      "prior_interpretation": "The Sunday market run caused the split among the ferrymen.",
+      "learner_input": "That old minute just shows they argued about small things back then. The market run is still the cause of the real split; the earlier dispute doesn't matter.",
+      "anchors": [
+        "concrete_conditions",
+        "change_development_history",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C4a.s1",
+          "text": "Ask what in the records supports calling the earlier dispute 'small' and how the two disputes compare.",
+          "check": "human"
+        },
+        {
+          "id": "C4a.s2",
+          "text": "Treat the original interpretation as testable by the new fact, not as settled.",
+          "check": "human"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C4a.f1",
+          "text": "Tell the learner the right revised interpretation before they try.",
+          "check": "human"
+        },
+        {
+          "id": "C4a.f2",
+          "text": "Accept dismissal of the new fact without evidence, or reward persistence in the original view.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "revision_on_new_evidence",
+        "development_and_history",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "concrete_conditions",
+          "change_development_history",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "C4b",
+      "pair": "P4",
+      "kind": "new_evidence_revision",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": "S1",
+      "new_fact": "NEW FACT (INVENTED): meeting minutes from nine years ago, before the Sunday market run existed, record the same dispute between older and younger ferrymen about how trips are allocated.",
+      "prior_interpretation": "The Sunday market run caused the split among the ferrymen.",
+      "learner_input": "That changes my view. The split predates the market run, so the run can't be its origin. It may have intensified the split or changed what it is about. I'd compare what the earlier dispute was about with today's and check whether the same people were involved. I'd drop the claim that the run created it and keep, for now, that it changed the stakes.",
+      "anchors": [
+        "concrete_conditions",
+        "change_development_history",
+        "evidence_for_opposed_aspects"
+      ],
+      "tutor_should": [
+        {
+          "id": "C4b.s1",
+          "text": "Recognise the revision as supported by the new record and ask what comparison would test the 'changed the stakes' claim.",
+          "check": "human"
+        },
+        {
+          "id": "C4b.s2",
+          "text": "Not force the case into any dialectical category the evidence does not yet warrant.",
+          "check": "human"
+        },
+        {
+          "id": "C4b.s3",
+          "text": "Ask no more than one question in the turn.",
+          "check": "mechanical:M_ONEQ"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "C4b.f1",
+          "text": "Praise the learner for 'correctly applying' any named method.",
+          "check": "mechanical:M_PRAISE"
+        },
+        {
+          "id": "C4b.f2",
+          "text": "Use a thesis-antithesis-synthesis template unless a supplied passage uses it.",
+          "check": "mechanical:M_TAS"
+        }
+      ],
+      "rubric_focus": [
+        "revision_on_new_evidence",
+        "development_and_history",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "concrete_conditions",
+          "change_development_history",
+          "evidence_for_opposed_aspects"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "K1",
+      "pair": "K",
+      "kind": "concept_probe_materialism_idealism",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": null,
+      "learner_input": "Materialism just means caring about money and things, so a 'materialist' explanation of the co-op is that the ferrymen are greedy.",
+      "anchors": [
+        "materialism_idealism"
+      ],
+      "tutor_should": [
+        {
+          "id": "K1.s1",
+          "text": "Ask in which sense the selected passages use 'materialism' and, if passages are confirmed, quote them; otherwise state that the library does not establish it.",
+          "check": "mechanical:M_LIMITS"
+        },
+        {
+          "id": "K1.s2",
+          "text": "Keep the everyday sense and the passages' sense apart without asserting either from outside knowledge.",
+          "check": "human"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "K1.f1",
+          "text": "State what 'materialism' means in the authors' usage without a cited passage.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "fidelity_to_passages_and_author_differences",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "materialism_idealism"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "K2",
+      "pair": "K",
+      "kind": "concept_probe_dialectical_vs_metaphysical",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": null,
+      "learner_input": "A dialectical analysis is one that looks at both sides, and a metaphysical analysis is one that talks about abstract, spiritual things.",
+      "anchors": [
+        "dialectical_vs_metaphysical_method",
+        "author_differences"
+      ],
+      "tutor_should": [
+        {
+          "id": "K2.s1",
+          "text": "Ask which author's usage is meant and compare what each selected author says in their own words (cited), noting where usages differ.",
+          "check": "human"
+        },
+        {
+          "id": "K2.s2",
+          "text": "If only one author is covered, say the library gives one usage and cannot show agreement across authors.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "K2.f1",
+          "text": "Merge different authors' usages into one definition.",
+          "check": "human"
+        },
+        {
+          "id": "K2.f2",
+          "text": "Supply a definition of either method from outside the library.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "fidelity_to_passages_and_author_differences"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "dialectical_vs_metaphysical_method",
+          "author_differences"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    },
+    {
+      "id": "K3",
+      "pair": "K",
+      "kind": "concept_probe_cartesian_dualism",
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "scenario_ref": null,
+      "learner_input": "Descartes's mind-body dualism is basically the materialism-versus-idealism question, and it's also what 'metaphysical' means.",
+      "anchors": [
+        "cartesian_mind_body_dualism",
+        "materialism_idealism",
+        "dialectical_vs_metaphysical_method"
+      ],
+      "tutor_should": [
+        {
+          "id": "K3.s1",
+          "text": "Separate three questions as app-authored framing, not as claims about any author: what is treated as primary (matter or ideas); how change should be studied (method); how mind and body relate in a single individual.",
+          "check": "human"
+        },
+        {
+          "id": "K3.s2",
+          "text": "State whether the selected texts address Descartes or mind-body dualism at all; if they do not, say the library does not establish the relationship and do not fill the gap from outside knowledge.",
+          "check": "mechanical:M_LIMITS"
+        }
+      ],
+      "tutor_should_not": [
+        {
+          "id": "K3.f1",
+          "text": "Assert historical or philosophical claims about Descartes or any author as source claims without a cited passage.",
+          "check": "human"
+        },
+        {
+          "id": "K3.f2",
+          "text": "Accept the three-way equation without testing it against the passages.",
+          "check": "human"
+        }
+      ],
+      "rubric_focus": [
+        "fidelity_to_passages_and_author_differences",
+        "uncertainty_and_limits"
+      ],
+      "owner_review": "pending",
+      "source_traceability": {
+        "status": "pending",
+        "depends_on_concepts": [
+          "cartesian_mind_body_dualism",
+          "materialism_idealism",
+          "dialectical_vs_metaphysical_method"
+        ],
+        "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
+      }
+    }
+  ],
+  "_review_note": "Drafted by an AI model as a starting point. Every case, and every expected behaviour, needs the OWNER's review and edits (owner_review: pending). The pairing of 'better' and 'worse' reflects the drafter's judgement and may be wrong."
+}

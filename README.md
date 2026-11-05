@@ -115,7 +115,7 @@ See `docs/BUILD_STATUS.md` for what was actually run and what remains unverified
 
 ## Docs
 
-`docs/REAL_DOCUMENT_ACCEPTANCE.md` (**start here with your own files**) · `docs/ARCHITECTURE.md` · `docs/INGESTION.md` · `docs/PRIVACY.md` · `docs/LIVE_EVAL_CHECKLIST.md` ·
+`docs/REAL_DOCUMENT_ACCEPTANCE.md` (**start here with your own files**) · `docs/dialectical/` (concept map, audit, evaluation design for the dialectical-materialism goal) · `docs/ARCHITECTURE.md` · `docs/INGESTION.md` · `docs/PRIVACY.md` · `docs/LIVE_EVAL_CHECKLIST.md` ·
 `docs/BUILD_PLAN.md` · `docs/BUILD_STATUS.md` · `CLAUDE.md`
 
 ## Known limitations

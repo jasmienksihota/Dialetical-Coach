@@ -1,0 +1,296 @@
+{
+  "_label": "APP-CREATED CONCEPT MAP SKELETON. It contains NO source passages and makes NO claim about what any author says or means. Support can only come from the owner's APPROVED library, found with `python tools/dm_eval.py probe` and then confirmed by the owner by hand in a local, git-ignored file. Until a concept is confirmed, the tutor must treat it as 'not established by the selected library'.",
+  "version": 1,
+  "support_policy": {
+    "confirmation_file": "data/concept_confirmations.json (local, git-ignored, written by the OWNER)",
+    "statuses": {
+      "unsupported": "nothing confirmed yet (default; this repository ships only this)",
+      "confirmed": "owner confirmed >=1 passage from an approved document supports an author's usage",
+      "not_addressed": "owner reviewed candidates and the approved library does not address this concept"
+    },
+    "rule": "The tutor may state what texts say about a concept only through confirmed passages; otherwise it must say the selected library does not establish it."
+  },
+  "concepts": [
+    {
+      "id": "materialism_idealism",
+      "title": "Materialism and idealism, as each selected author uses the terms",
+      "question_for_the_library": "What does each selected author treat as primary (matter / being or ideas / consciousness), and what reasons do they give?",
+      "must_not_be_conflated_with": [
+        "dialectical_vs_metaphysical_method",
+        "cartesian_mind_body_dualism"
+      ],
+      "search_term_groups": [
+        [
+          "materialism",
+          "materialist",
+          "idealism",
+          "idealist"
+        ],
+        [
+          "matter",
+          "consciousness",
+          "ideas",
+          "being"
+        ],
+        [
+          "primary",
+          "secondary",
+          "first",
+          "determines"
+        ]
+      ],
+      "app_framing_question": "In the selected passages, what is treated as primary, and what reasons are given for that?",
+      "notes": "Everyday 'materialistic' (money-minded) is a different sense of the word; the tutor should ask which sense a passage uses.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "dialectical_vs_metaphysical_method",
+      "title": "Dialectical and metaphysical methods, in each selected author's own usage",
+      "question_for_the_library": "How does each author characterise the two methods, and what do they say the difference is? Do authors use 'metaphysical' differently?",
+      "must_not_be_conflated_with": [
+        "materialism_idealism",
+        "cartesian_mind_body_dualism"
+      ],
+      "search_term_groups": [
+        [
+          "dialectic",
+          "dialectical",
+          "dialectics",
+          "metaphysical",
+          "metaphysics"
+        ],
+        [
+          "one-sided",
+          "isolated",
+          "static",
+          "fixed",
+          "motion",
+          "development"
+        ]
+      ],
+      "app_framing_question": "How does each author describe the two methods, in their own words? Do any two authors use the terms differently?",
+      "notes": "Do NOT assume one author's usage holds for another.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "cartesian_mind_body_dualism",
+      "title": "Cartesian mind-body dualism (a separate question)",
+      "question_for_the_library": "Do the selected texts discuss mind-body dualism / Descartes at all? If so, how do they relate it to the materialism-idealism question and to method?",
+      "must_not_be_conflated_with": [
+        "materialism_idealism",
+        "dialectical_vs_metaphysical_method"
+      ],
+      "search_term_groups": [
+        [
+          "Descartes",
+          "Cartesian",
+          "dualism",
+          "dualist"
+        ],
+        [
+          "mind",
+          "body",
+          "soul",
+          "substance",
+          "thinking"
+        ]
+      ],
+      "app_framing_question": "Do the selected texts discuss mind-body dualism at all? If not, say so; do not fill the gap from outside the library.",
+      "notes": "Often an outside-the-library topic. If the approved texts do not address it, the correct tutor behaviour is an insufficient-evidence statement.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "contradiction_and_lookalikes",
+      "title": "A dialectical contradiction versus mere disagreement, a practical tradeoff, or a logical inconsistency",
+      "question_for_the_library": "What do the selected texts say a contradiction is? Do they distinguish it from mere difference or disagreement, from compromise or tradeoff, or from formal-logical inconsistency — or do they not address those contrasts?",
+      "search_term_groups": [
+        [
+          "contradiction",
+          "contradictions",
+          "opposites",
+          "opposed",
+          "antagonism",
+          "antagonistic"
+        ],
+        [
+          "unity",
+          "struggle",
+          "interpenetration",
+          "identity",
+          "aspects"
+        ],
+        [
+          "difference",
+          "disagreement",
+          "compromise",
+          "trade-off",
+          "inconsistency",
+          "logical",
+          "formal logic"
+        ]
+      ],
+      "app_framing_question": "What do the passages say counts as a contradiction, and what (if anything) do they say it is NOT?",
+      "notes": "The comparators (disagreement / tradeoff / inconsistency) are the app's teaching contrasts, not claims about the authors; the library may or may not draw them.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      },
+      "teaching_comparators": [
+        "disagreement",
+        "practical_tradeoff",
+        "logical_inconsistency"
+      ],
+      "must_not_be_conflated_with": []
+    },
+    {
+      "id": "concrete_conditions",
+      "title": "Investigating concrete conditions",
+      "question_for_the_library": "What do the texts say about studying the specific conditions of a case before drawing conclusions?",
+      "must_not_be_conflated_with": [],
+      "search_term_groups": [
+        [
+          "concrete",
+          "specific",
+          "conditions",
+          "investigation",
+          "investigate",
+          "facts"
+        ],
+        [
+          "analysis",
+          "situation",
+          "circumstances"
+        ]
+      ],
+      "app_framing_question": "What do the passages say about how to study the specific case before concluding?",
+      "notes": "",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "relations_interdependence",
+      "title": "Relations and interdependence",
+      "question_for_the_library": "How do the texts describe things as connected, conditioned by or dependent on one another?",
+      "must_not_be_conflated_with": [],
+      "search_term_groups": [
+        [
+          "relation",
+          "relations",
+          "connection",
+          "connected",
+          "interconnection",
+          "interdependence",
+          "conditioned"
+        ],
+        [
+          "depends",
+          "dependent",
+          "mutual",
+          "reciprocal"
+        ]
+      ],
+      "app_framing_question": "What do the passages say about how things in a case are related or depend on each other?",
+      "notes": "",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "change_development_history",
+      "title": "Change, development and history",
+      "question_for_the_library": "How do the texts treat change, development and the historical formation of a situation?",
+      "must_not_be_conflated_with": [],
+      "search_term_groups": [
+        [
+          "change",
+          "development",
+          "history",
+          "historical",
+          "process",
+          "transformation",
+          "becoming"
+        ],
+        [
+          "motion",
+          "movement",
+          "emerge",
+          "origin",
+          "formation"
+        ]
+      ],
+      "app_framing_question": "What do the passages say about how a situation came to be and how it changes?",
+      "notes": "",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "evidence_for_opposed_aspects",
+      "title": "The evidential basis for identifying opposed aspects",
+      "question_for_the_library": "What do the selected texts say would show, in a concrete case, that an identified contradiction (or pair of opposed aspects) is really present rather than merely asserted?",
+      "must_not_be_conflated_with": [
+        "contradiction_and_lookalikes"
+      ],
+      "search_term_groups": [
+        [
+          "evidence",
+          "investigation",
+          "facts",
+          "observe",
+          "observation",
+          "proof",
+          "verify",
+          "test"
+        ],
+        [
+          "aspects",
+          "opposed",
+          "contradictory",
+          "both",
+          "each"
+        ]
+      ],
+      "app_framing_question": "What do the passages say would show, in a concrete case, that two aspects really are opposed and bound together?",
+      "notes": "May be thin or absent in the library; if so the tutor must say so rather than invent criteria.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    },
+    {
+      "id": "author_differences",
+      "title": "Differences among authors",
+      "question_for_the_library": "Where do the selected authors differ in terminology, emphasis, context or conclusions?",
+      "must_not_be_conflated_with": [],
+      "search_term_groups": [
+        [
+          "differ",
+          "differs",
+          "unlike",
+          "whereas",
+          "however"
+        ]
+      ],
+      "app_framing_question": "Where do two selected authors say different things about the same concept, and what is each one's context?",
+      "notes": "Filled in by the owner while confirming the other concepts: list the authors whose usage differs.",
+      "support": {
+        "status": "unsupported",
+        "passages": []
+      }
+    }
+  ],
+  "_comparator_note": "'teaching_comparators' are the APP's teaching contrasts, not claims about what any author says; the library may or may not draw them."
+}

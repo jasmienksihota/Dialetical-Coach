@@ -53,6 +53,13 @@ never describe mechanical checks as verifying tutoring quality; the UI label is 
     development without the owner's explicit permission. The model ID is
     configuration (`ANTHROPIC_MODEL`); never hard-code or guess one.
 
+11. **Core educational goal: dialectical materialism, from the owner's approved sources.** Never claim it is
+    achieved because "dialectical" appears in prompts, citations pass mechanical checks, or scripted exercises run.
+    Concepts come from confirmed passages (`eval/dialectical/`, `docs/dialectical/`); do not assert what an author
+    says without one, do not reward terminology or agreement, do not force every case into every category, do not
+    use thesis-antithesis-synthesis as a template, and say when the library does not establish something.
+    Live-model philosophical performance is untested until run and human-rated (see `docs/dialectical/EVALUATION.md`).
+
 ## Stack and layout
 
 Python 3.10+ / FastAPI / SQLite (FTS5, with a safe non-FTS fallback) / vanilla
