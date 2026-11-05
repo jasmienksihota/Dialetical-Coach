@@ -1,5 +1,6 @@
 """Exercise engine: turn-taking, no premature reveal, gating, modes, reflection."""
 import json
+import re
 
 import pytest
 
@@ -241,6 +242,8 @@ def test_feedback_is_qualitative_labeled_and_sources_are_checkable(env):
     c = act(env, cid, "answer", ANSWER).json()["conversation"]
     fb = [b for b in last_ai(c)["blocks"] if b.get("purpose") == "feedback"]
     text = " ".join(b["text"] for b in fb)
-    assert "NOT an evaluation" in text and "Visible in your answer" in text
+    assert "cannot assess your reasoning" in text and "nothing here evaluates it" in text
+    assert not re.search(r"keyword|matched|visible in your answer", text, re.I)                # no keyword 'assessment'
+    assert "which facts" in text and "your inference" in text
     assert not any(ch in text for ch in ("/10", "%", "IQ"))
     assert any(b["type"] == "quote" and b["status"] == "verified" for b in fb)    # source-supported feedback

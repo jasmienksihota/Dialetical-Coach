@@ -126,6 +126,7 @@ def chunk_to_dict(doc, chunk) -> dict:
         "section": chunk["section"], "line_start": chunk["line_start"],
         "line_end": chunk["line_end"], "location": location_label(doc, chunk),
         "doc_title": doc["title"], "doc_kind": doc["kind"], "doc_approved": bool(doc["approved"]),
+        "doc_author": doc["author"], "doc_date": doc["date"], "doc_edition": doc["edition"],
     }
 
 

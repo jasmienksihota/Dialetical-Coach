@@ -32,6 +32,7 @@ class Services:
 def snapshot(h: dict) -> dict:
     return {"id": h["id"], "doc_id": h["doc_id"], "doc_title": h["doc_title"],
             "doc_kind": h.get("doc_kind", "primary"), "location": h["location"],
+            "doc_author": h.get("doc_author"), "doc_date": h.get("doc_date"), "doc_edition": h.get("doc_edition"),
             "text": h["text"], "score": h.get("score")}
 
 
