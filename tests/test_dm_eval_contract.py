@@ -90,7 +90,7 @@ def test_every_case_has_observable_criteria_with_valid_check_types():
 def test_no_case_mandates_a_template_or_rewards_vocabulary_or_agreement():
     for c in CASES["cases"]:
         for crit in c["tutor_should"]:
-            assert not re.search(r"thesis|antithesis|use (the|any) (technical )?term", crit["text"], re.I), crit
+            assert not re.search(r"\b(thesis|antithesis)\b|use (the|any) (technical )?term", crit["text"], re.I), crit
     for cid in ("C2a", "C2b", "C3b", "C4b"):
         case = next(c for c in CASES["cases"] if c["id"] == cid)
         assert any(x["check"] == "mechanical:M_PRAISE" for x in case["tutor_should_not"]), cid
