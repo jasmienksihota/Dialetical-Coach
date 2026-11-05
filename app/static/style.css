@@ -1,67 +1,56 @@
 /* =====================================================================
-   DESIGN TOKENS: edit colours, fonts, radii and shadows here only.
-   Visual language follows the "Sugar Doodle" reference artifact (cream
-   paper, 2px ink outlines, pill buttons, sticker shadows, pastel fills,
-   sparkle motif), adapted for a reading tool: sticker shadows are kept
-   to buttons and a few panels, never behind long text, and there is no
-   decorative animation. See docs/DESIGN.md (contrast: scripts/check_contrast.py).
-   The sparkle is the single file /static/star.svg (theme-aware inside).
-   Fonts are bundled in /static/fonts (SIL OFL); no remote requests.
+   DESIGN TOKENS: edit colours, fonts, radii here only.
+   Visual language follows the "Ethereal" design-system artifact (cotton-haze
+   ground, lowercase Jost + DM Mono, square corners, hairlines, one heavy
+   twilight band, soft pastel smears), ADAPTED for a reading tool:
+   lowercase is applied to interface chrome only, never to passages, quotes,
+   answers, document titles or the required disclosure wording; no grain and
+   no drifting animation (nothing moves; nothing textured behind long text).
+   Contrast: scripts/check_contrast.py. Docs: docs/DESIGN.md.
+   Fonts bundled in /static/fonts (SIL OFL); no remote requests.
    ===================================================================== */
-@font-face{font-family:"Fredoka";font-weight:500;font-display:swap;src:url(/static/fonts/fredoka-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:"Fredoka";font-weight:600;font-display:swap;src:url(/static/fonts/fredoka-latin-600-normal.woff2) format("woff2")}
-@font-face{font-family:"Nunito";font-weight:400;font-display:swap;src:url(/static/fonts/nunito-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:"Nunito";font-weight:500;font-display:swap;src:url(/static/fonts/nunito-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:"Nunito";font-weight:800;font-display:swap;src:url(/static/fonts/nunito-latin-800-normal.woff2) format("woff2")}
-@font-face{font-family:"Caveat";font-weight:600;font-display:swap;src:url(/static/fonts/caveat-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-weight:300;font-display:swap;src:url(/static/fonts/jost-latin-300-normal.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-weight:400;font-display:swap;src:url(/static/fonts/jost-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-weight:500;font-display:swap;src:url(/static/fonts/jost-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"DM Mono";font-weight:400;font-display:swap;src:url(/static/fonts/dm-mono-latin-400-normal.woff2) format("woff2")}
 :root{
-  /* surfaces + ink */
-  --bg:#FBF4E6;          /* cream: page */
-  --panel:#FFFDF8;       /* paper: cards, passages, answers, inputs */
-  --linen:#EFE3CF;       /* quiet secondary surface */
-  --ink:#3B2F2A;         /* text + outlines */
-  --muted:#6B5A52;       /* secondary text */
-  --line:#E3D3C2;        /* decorative hairlines only */
-  --line-strong:#3B2F2A; /* control / card outlines (2px) */
-  /* accents */
-  --accent:#A9506C;      /* peony-deep: links, small accent text */
-  --btn:#E8A8B8;         /* peony: primary buttons */
-  --btn-ink:#3B2F2A;
-  --accent-ink:#3B2F2A;  /* text on --btn */
-  --leaf:#B9C78E;        /* matcha: approve buttons, ok fills */
-  --leaf-ink:#3B2F2A;
-  --leaf-text:#5F6630;   /* olive: green text */
-  --blush:#F6D9DC; --blush-ink:#3B2F2A;
-  --hl:#F5E3A8; --hl-ink:#3B2F2A; /* passage highlight: light in both modes */
-  --butter:#F5E3A8; --lilac:#C9BDE6; --sky:#CFDDF3;
-  --star:#E8A8B8;
-  --focus:#3B2F2A;
-  /* status */
-  --warn-bg:#F5E3A8; --warn-ink:#3B2F2A;
-  --bad-bg:#F6D9DC;  --bad-ink:#8A2A3F;
-  --ok-bg:#DDE6C2;   --ok-ink:#3F4520;
-  /* block-type label colours (text on --panel) */
-  --quote:#A9506C; --interp:#6A4A8C; --synth:#25656A; --fiction:#8F5200; --coach:#6B5A52; --limits:#8A3B3B;
-  /* type */
-  --font-head:"Fredoka","Nunito",system-ui,sans-serif;
-  --font-body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --font-hand:"Caveat","Segoe Print",cursive;  /* short decorative notes only */
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  /* shape */
-  --r-sm:12px; --r:24px; --r-md:18px; --r-pill:999px; --outline:2px;
-  --shadow-sticker:3px 3px 0 var(--ink);
-  --shadow-soft:0 8px 24px rgba(59,47,42,.10);
+  --bg:#F5E9F0;          /* cotton-haze: page */
+  --panel:#FFF8FB;       /* pearl: cards, passages, answers, inputs */
+  --linen:#E9DDF0;       /* lilac-fog: quiet bands */
+  --ink:#2C2438; --muted:#5C5068;
+  --line:#D9C6D6;        /* hairline: decorative rules only */
+  --line-strong:#6E6280; /* control boundaries (>=3:1) */
+  --accent:#9A3F72;      /* candy-wine: links, active */
+  --btn:#3A2E5C; --btn-ink:#FFF8FB; --accent-ink:#FFF8FB;   /* twilight buttons */
+  --leaf:#BFE6D6; --leaf-ink:#2C2438; --leaf-text:#4D5BA8;  /* mint approve; ink-blue text */
+  --blush:#F2B5CB; --blush-ink:#2C2438;                     /* baby-pink: selected */
+  --hl:#F7DFA8; --hl-ink:#2C2438;                           /* butter-glow passage highlight */
+  --butter:#F7DFA8; --lilac:#C3AEE8; --sky:#E9DDF0; --star:#F2B5CB;
+  --focus:#2C2438;
+  --twilight:#3A2E5C; --pearl:#FFF8FB; --smear-a:#F2B5CB; --smear-b:#9FAEEA; --smear-c:#C3AEE8;
+  --warn-bg:#F7DFA8; --warn-ink:#2C2438;
+  --bad-bg:#F7D3E0;  --bad-ink:#7A2350;
+  --ok-bg:#CFEBDD;   --ok-ink:#1F4A3A;
+  --quote:#9A3F72; --interp:#4D5BA8; --synth:#1F6B66; --fiction:#8F5200; --coach:#5C5068; --limits:#8A3D6E;
+  --font-head:"Jost","Futura","Century Gothic",sans-serif;
+  --font-body:"Jost","Futura","Century Gothic",sans-serif;
+  --font-hand:"DM Mono",ui-monospace,monospace;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-sm:2px; --r:0; --r-md:0; --r-pill:0; --outline:1px;
+  --shadow-sticker:none; --shadow-soft:0 0 80px 10px rgba(247,223,168,.35);
+  --ghost:3px 0 6px rgba(232,144,176,.6),-3px 0 6px rgba(159,174,234,.6);
   --measure:68ch;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#231C1A; --panel:#2E2523; --linen:#382D2A; --ink:#F5EBDD; --muted:#C9BAAE; --line:#4A3C37; --line-strong:#D9C9B8;
-    --accent:#F0A0B4; --btn:#E8A8B8; --btn-ink:#3B2F2A; --accent-ink:#3B2F2A;
-    --leaf:#B9C78E; --leaf-ink:#2A2E14; --leaf-text:#C9D6A0; --blush:#4A2E34; --blush-ink:#F8DDE1;
-    --butter:#5A4A1F; --hl:#F5E3A8; --hl-ink:#3B2F2A; --lilac:#4A4166; --sky:#2F3C55; --star:#E8A8B8; --focus:#F5EBDD;
-    --warn-bg:#4A3E17; --warn-ink:#F5E3A8; --bad-bg:#4F2A33; --bad-ink:#F7C3CC; --ok-bg:#2F3A1E; --ok-ink:#D3E2AE;
-    --quote:#F0A0B4; --interp:#CDB8EE; --synth:#76D0D0; --fiction:#EFB468; --coach:#C9BAAE; --limits:#E8A3A0;
-    --shadow-sticker:3px 3px 0 #000; --shadow-soft:0 8px 24px rgba(0,0,0,.35);
+    --bg:#1E1830; --panel:#2A2142; --linen:#352B52; --ink:#F5E9F0; --muted:#CFC2DA; --line:#4A3F66; --line-strong:#A99BC4;
+    --accent:#F2B5CB; --btn:#F2B5CB; --btn-ink:#2C2438; --accent-ink:#2C2438;
+    --leaf:#BFE6D6; --leaf-ink:#1F3A2E; --leaf-text:#B9C4F5; --blush:#5A3A68; --blush-ink:#FFF8FB;
+    --hl:#F7DFA8; --hl-ink:#2C2438; --butter:#5A4A2F; --lilac:#4A3F7A; --sky:#352B52; --star:#F2B5CB;
+    --focus:#F5E9F0; --twilight:#14102A; --pearl:#FFF8FB;
+    --warn-bg:#4A3E22; --warn-ink:#F7DFA8; --bad-bg:#4F2A3F; --bad-ink:#F7C3D5; --ok-bg:#24423A; --ok-ink:#CFEBDD;
+    --quote:#F2B5CB; --interp:#B9C4F5; --synth:#8FD9D2; --fiction:#EFB468; --coach:#CFC2DA; --limits:#F0A8C8;
+    --shadow-soft:0 0 60px 6px rgba(0,0,0,.35); --ghost:3px 0 6px rgba(232,144,176,.35),-3px 0 6px rgba(159,174,234,.35);
   }
 }
 /* ===================== end of tokens ===================== */
@@ -204,3 +193,60 @@ a{color:var(--accent)}
 
 .scope-preview ul{margin:.2rem 0 .3rem 1.1rem;padding:0}
 .scope-preview li{font-size:.88rem}
+
+/* ===================== Ethereal adaptation (overrides above) ===================== */
+body{font-weight:400;font-size:17px;line-height:1.65;background:var(--bg);position:relative}
+/* soft pastel smears behind the page; panels are opaque so no texture sits behind long text */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;
+  background:
+   radial-gradient(60% 6% at 20% 18%,var(--smear-a),transparent 70%),
+   radial-gradient(70% 5% at 80% 46%,var(--smear-b),transparent 70%),
+   radial-gradient(60% 6% at 30% 78%,var(--smear-c),transparent 70%);filter:blur(30px)}
+@media (prefers-color-scheme: dark){body::before{opacity:.18}}
+.star,.empty .star{display:none}
+h1,h2,h3{font-weight:300;letter-spacing:-.01em}
+h3,.card h3{font-weight:400}
+main > section > h2,.panel > h2:first-child{background:none;font-size:2.4rem;line-height:1.1;text-shadow:var(--ghost);text-transform:lowercase;display:block;padding:0}
+#modal-body > h2:first-child{font-size:1.8rem;text-shadow:none;text-transform:none}
+legend,nav button,button,.empty p{text-transform:lowercase}
+.cite-chip,.side .conv,.card h3,.hit,.target,.ctx,.chunk,.body,textarea,input{text-transform:none}
+.empty p{font:400 .9rem var(--font-hand);line-height:1.5}
+/* header: the one heavy twilight band */
+header.top{background:var(--twilight);color:var(--pearl);border-bottom:0}
+.brand{color:var(--pearl);font-weight:300;font-size:1.7rem;text-shadow:var(--ghost);text-transform:lowercase}
+.brand .muted{color:#D9CDE6;font:400 .8rem var(--mono);text-shadow:none}
+nav button{color:var(--pearl);font:400 .9rem var(--mono);padding:.4rem .7rem;border:0;border-bottom:1px solid transparent;border-radius:0}
+nav button:hover{background:none;color:#F2B5CB;border-bottom-color:#F2B5CB}
+nav button.active{background:none;color:#F2B5CB;border-bottom-color:#F2B5CB}
+.chip{font:400 .8rem var(--mono);border:1px solid var(--pearl)}
+/* square surfaces, hairlines instead of heavy outlines */
+.panel,.card,.msg,.ex-panel,.modal-box{border:1px solid var(--line-strong);border-radius:0;box-shadow:none}
+.panel,.modal-box{box-shadow:var(--shadow-soft)}
+.msg.user{border-radius:0;background:var(--blush);color:var(--blush-ink)} .msg.assistant{border-radius:0}
+.badge,.tagchip,.cite-chip,.chip,.banner,.notice,#toast{border-radius:0}
+.badge,.tagchip{font:400 .72rem var(--mono);border:1px solid var(--line-strong);text-transform:lowercase}
+.hit{border:1px solid var(--line-strong);border-left:4px solid var(--accent);border-radius:0}
+.chunk,.evidence{border-color:var(--line)}
+.cite-chip{font:400 .78rem var(--mono);border:1px solid var(--line-strong)}
+/* buttons: square outlined boxes; primary is twilight */
+button{font:400 .92rem var(--font-body);border:1px solid var(--line-strong);border-radius:0;box-shadow:none;transition:none}
+button:hover{background:var(--blush);color:var(--blush-ink);transform:none}
+button.primary,button.primary:hover{background:var(--btn);color:var(--btn-ink);border-color:var(--btn);box-shadow:none;transform:none}
+button.primary:hover{background:var(--accent);border-color:var(--accent);color:#FFF8FB}
+@media (prefers-color-scheme: dark){button.primary:hover{background:var(--blush);color:var(--blush-ink)}}
+button.approve-btn,button.approve-btn:hover{background:var(--leaf);color:var(--leaf-ink);border-color:var(--line-strong);box-shadow:none;transform:none}
+.side .conv{border-radius:0}
+.side .conv.active{box-shadow:none;border-left:4px solid var(--accent);background:var(--blush);color:var(--blush-ink)}
+input[type=text],input[type=search],input[type=number],select,textarea,input[type=file]{border:1px solid var(--line-strong);border-radius:2px;font:400 1rem var(--font-body)}
+fieldset{border:1px solid var(--line);border-radius:0}
+.block{border-radius:0}
+.block.question{background:var(--butter);color:var(--ink);border-color:var(--ink)}
+.modal{background:rgba(44,36,56,.5)}
+@media (min-width:1100px){.modal-box{border-radius:0;border-right:0}.modal{background:rgba(44,36,56,.35)}}
+.close{border-radius:0;width:2.2rem;height:2.2rem}
+#new-panel > h3::before{border-radius:0;background:var(--hl);color:var(--hl-ink);border:1px solid var(--line-strong);font:400 .9rem var(--mono)}
+#new-panel{box-shadow:var(--shadow-soft)}
+button.link{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.msg .who,.hit .meta,.tiny,.chunk .loc,summary{font-family:var(--mono);font-weight:400}
+.phase{font-weight:400}
