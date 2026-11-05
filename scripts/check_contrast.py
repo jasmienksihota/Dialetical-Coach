@@ -29,6 +29,7 @@ PAIRS = [
     ("Body text on page", "ink", "bg", 4.5), ("Body text on reading surface", "ink", "panel", 4.5),
     ("Muted text on page", "muted", "bg", 4.5), ("Muted text on reading surface", "muted", "panel", 4.5),
     ("Primary button text on tomato", "accent-ink", "accent", 4.5),
+    ("Approve button text on leaf", "leaf-ink", "leaf", 4.5),
     ("Link / cite chip tomato on surface", "accent", "panel", 4.5),
     ("Link tomato on page", "accent", "bg", 4.5),
     ("Text on blush (user message, selected, passage)", "blush-ink", "blush", 4.5),
