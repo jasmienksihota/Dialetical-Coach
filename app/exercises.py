@@ -205,11 +205,6 @@ def start_exercise(svc: Services, cfg: dict) -> dict:
         return {"status": "blocked", "message": (
             "No approved documents are in the selected scope. Approve documents in the Library "
             "(or widen the selection) before starting an exercise.")}
-    if not hits:
-        return {"status": "blocked", "message": (
-            "I found no passages in the selected documents that relate to this exercise's concepts. "
-            "The selected library does not appear to cover them. Add a focus term that appears in "
-            "your texts, or select different documents.")}
     if kind == "historical":
         strong = [h for h in hits if h["coverage"] >= 0.5]
         if len(strong) < 3:
@@ -218,6 +213,11 @@ def start_exercise(svc: Services, cfg: dict) -> dict:
                 f"(found {len(strong)} well-matching passage(s); at least 3 are required). "
                 "I will not invent details. Try a fictional scenario, or add/select more documentation.")}
         hits = strong
+    if not hits:
+        return {"status": "blocked", "message": (
+            "I found no passages in the selected documents that relate to this exercise's concepts. "
+            "The selected library does not appear to cover them. Add a focus term that appears in "
+            "your texts, or select different documents.")}
     limitation = ""
     if multi and res.distinct_docs < 2 and kind != "historical":
         if not cfg.get("allow_single_source"):
