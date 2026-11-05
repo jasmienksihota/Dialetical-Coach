@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local app data: originals, extracted text, databases, sessions, exports
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+exports/
+uploads/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# OS / editor / test artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+test-artifacts/
