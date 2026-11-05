@@ -1,1 +1,106 @@
-<!doctype html><title>placeholder</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source-Grounded Tutor</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Source-Grounded Tutor <span class="muted small">local · single-user</span></div>
+  <nav id="nav">
+    <button data-view="library" class="active">Library</button>
+    <button data-view="search">Search</button>
+    <button data-view="sessions">Sessions</button>
+    <button data-view="about">About &amp; privacy</button>
+  </nav>
+  <div id="status-chip" class="chip" title="Server mode"></div>
+</header>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<main>
+  <!-- ============================ LIBRARY ============================ -->
+  <section id="view-library">
+    <div class="panel">
+      <h2>Import a document</h2>
+      <p class="muted small">PDF, TXT or Markdown. New imports are <strong>unapproved</strong> and are never used for answers until you approve them. Nothing is invented: leave bibliographic fields blank if you don't know them.</p>
+      <form id="upload-form" class="grid">
+        <label>File <input id="file-input" type="file" accept=".pdf,.txt,.md,.markdown" required></label>
+        <label>Title <input id="up-title" type="text" placeholder="(defaults to the file name)"></label>
+        <label>Author <input id="up-author" type="text" placeholder="if known"></label>
+        <label>Date <input id="up-date" type="text" placeholder="if known"></label>
+        <label>Edition / translation <input id="up-edition" type="text" placeholder="if known"></label>
+        <label class="check"><input id="up-secondary" type="checkbox"> Secondary study notes (e.g. a NotebookLM note you copied in) — kept out of retrieval unless you opt in</label>
+        <fieldset class="tags-field"><legend>Topic tags (choose any number)</legend><div id="up-tags" class="taglist"></div></fieldset>
+        <div><button class="primary" id="upload-btn" type="submit">Import (unapproved)</button>
+          <button type="button" id="fixtures-btn" title="Imports invented test texts, clearly labeled SYNTHETIC">Load synthetic demo documents</button></div>
+      </form>
+      <p id="upload-msg" class="small"></p>
+    </div>
+    <h2>Library <span id="lib-count" class="muted small"></span></h2>
+    <div id="doc-list"></div>
+  </section>
+
+  <!-- ============================ SEARCH ============================ -->
+  <section id="view-search" hidden>
+    <div class="panel">
+      <h2>Search approved documents</h2>
+      <p class="muted small" id="retrieval-note"></p>
+      <form id="search-form" class="row">
+        <input id="search-q" type="search" placeholder="Search words in your approved sources…" required>
+        <button class="primary" id="search-btn" type="submit">Search</button>
+      </form>
+      <details><summary>Limit to documents / tags</summary><div id="search-scope"></div></details>
+    </div>
+    <div id="search-results"></div>
+  </section>
+
+  <!-- ============================ SESSIONS ============================ -->
+  <section id="view-sessions" hidden>
+    <div class="split">
+      <aside class="side">
+        <div class="row wrap">
+          <button class="primary" id="new-chat-btn">New chat</button>
+          <button class="primary" id="new-exercise-btn">New exercise</button>
+        </div>
+        <div id="conv-list"></div>
+      </aside>
+      <div class="content">
+        <div id="new-panel" class="panel" hidden></div>
+        <div id="conv-view"><p class="muted">Start a chat or an exercise, or open a saved session.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ ABOUT ============================ -->
+  <section id="view-about" hidden>
+    <div class="panel prose">
+      <h2>How grounding works here</h2>
+      <p>The tutor answers from <strong>passages retrieved from documents you approved</strong>. This is an <em>evidence policy</em>, not a guarantee: a language model cannot forget what it learned in pretraining, so you should always check quotations and readings against the sources. Each answer shows exactly which passages were supplied, and every citation is checked mechanically (the passage was supplied this turn, its document is approved and in scope, and quoted text appears in the passage). A valid citation does <strong>not</strong> prove the passage supports the claim — use <em>Flag as unsupported</em> and inspect the passage.</p>
+      <p>Retrieval is <strong>lexical</strong> (word matching with stemming). It does not match synonyms or paraphrases and is not semantic search. If your wording differs from the text, try other words.</p>
+      <h2>Privacy and data flow</h2>
+      <ul>
+        <li><strong>On your machine:</strong> originals, extracted text, the database and saved sessions live in the <code>data/</code> folder. The server listens on localhost only. No telemetry, no accounts.</li>
+        <li><strong>Demo mode</strong> ("Demo: scripted responses, not live tutoring.") never leaves your machine.</li>
+        <li><strong>Live mode</strong> sends the <em>selected passages and the conversation context</em> to the model provider you configured (Anthropic), using an API key kept only in your local <code>.env</code>. It is opt-in per session and uses your own API balance — separate from any Claude Code or claude.ai credits.</li>
+        <li>Developing this app in a cloud coding session and running it on your computer are different environments; the app's data does not live in the cloud session.</li>
+      </ul>
+      <h2>NotebookLM</h2>
+      <p>There is <strong>no live connection</strong> to NotebookLM. You can use the same original files in both. To move notes across, use <em>Export Markdown</em> on a session and paste/upload it into NotebookLM yourself. To bring notes back, import them here as <em>secondary study notes</em>; they stay separate from primary sources.</p>
+      <h2>Not for</h2>
+      <p>This is a personal learning tool. It is not for profiling people, ranking loyalty, collecting private political information, or persuasion campaigns. Exercise rubrics are app-created learning aids, not canonical standards, and feedback is qualitative.</p>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button id="modal-close" class="close" aria-label="Close">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
