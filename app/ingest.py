@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 
 from .config import TAG_SLUGS, Settings
 from .db import Database
+from .errors import AppError
 
 ALLOWED_EXTS = {".pdf": "pdf", ".txt": "txt", ".md": "md", ".markdown": "md"}
 MIN_PAGE_CHARS = 25          # fewer non-space chars => page counts as "no text"
@@ -30,11 +31,8 @@ HARD_CHUNK = 1400
 CONTEXT_CHARS = 300
 
 
-class IngestError(Exception):
-    def __init__(self, message: str, status: int = 400):
-        super().__init__(message)
-        self.message = message
-        self.status = status
+class IngestError(AppError):
+    pass
 
 
 @dataclass
