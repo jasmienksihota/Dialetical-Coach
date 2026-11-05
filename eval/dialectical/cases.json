@@ -55,8 +55,13 @@
     },
     "S2": {
       "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
-      "text": "A neighbourhood tool library run by volunteers. Two volunteers, Ana and Ben, disagree about opening hours: Ana wants evenings, Ben wants Saturdays. The group has a fixed budget of 20 volunteer-hours a week. The rulebook says both 'every volunteer must attend the monthly meeting' and 'no volunteer may be required to give more than 20 hours a month'; for some volunteers, meeting plus shifts exceeds 20 hours. Records available: sign-up sheets, the rulebook, the budget.",
+      "text": "A neighbourhood tool library run by volunteers. Two volunteers, Ana and Ben, disagree about opening hours: Ana wants evenings, Ben wants Saturdays. The group has a fixed budget of 20 volunteer-hours a week. Records exist (sign-up sheets and the budget) but their contents are NOT supplied in this scenario: any claim about what they show is a request for further investigation, not available evidence.",
       "question": "What is going on in the tool library, and is there a deeper contradiction at work?"
+    },
+    "S2b": {
+      "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
+      "text": "The same tool library. Its rulebook says that every volunteer must attend the monthly two-hour meeting and that no volunteer may be required to give more than 20 hours a month. Two volunteers are currently scheduled for 19 hours of shifts a month. (The two rules conflict only under these added conditions, and only for those two volunteers.)",
+      "question": "Is the rulebook a source of contradiction in the tool library?"
     }
   },
   "pairs": {
@@ -151,21 +156,31 @@
         },
         {
           "id": "C1b.s2",
-          "text": "Ask what kind of relationship the analysis claims between the two groups (for example opposed, mutually dependent, or merely different), what in the pay-share formula or minutes would show it, and what would count against it.",
+          "text": "Treat 'the Sunday run created a rival interest' as a hypothesis, not a finding, unless the case record establishes it; do not classify the whole answer as well supported merely because it names records to inspect.",
           "check": "human"
         },
         {
           "id": "C1b.s3",
-          "text": "Treat the 'bridge alone' alternative as a live reading, not an error; if an author's account of how external conditions act is brought in, attribute it to that author and say whether the supplied passages show others agree.",
+          "text": "Ask what kind of relationship the analysis claims between the two groups (for example opposed, mutually dependent, or merely different), what in the pay-share formula or minutes would show it, and what would count against it.",
           "check": "human"
         },
         {
           "id": "C1b.s4",
-          "text": "Judge the response by its support in the case record, not by how closely it resembles the authors' framing; accept that a narrower reading could also be defensible if the records support it.",
+          "text": "Treat the 'bridge alone' alternative as a live reading, not an error; if an author's account of how external conditions act is brought in, attribute it to that author and say whether the supplied passages show others agree.",
           "check": "human"
         },
         {
           "id": "C1b.s5",
+          "text": "Judge the response by its support in the case record, not by how closely it resembles the authors' framing; accept that a narrower reading could also be defensible if the records support it.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s6",
+          "text": "Over the dialogue, not necessarily in every turn, examine the explanatory claim itself: how a cause outside the co-op (the bridge) acted through conditions inside it, and what the supplied passages, attributed to their author, say about that. Relational language alone ('everything affects everything') is not the lesson.",
+          "check": "human"
+        },
+        {
+          "id": "C1b.s7",
           "text": "Ask no more than one question in the turn.",
           "check": "mechanical:M_ONEQ"
         }
@@ -211,7 +226,8 @@
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
       "first_diagnostic": true,
-      "revision_note": "Revised 2026-11-05 after reading the reference texts: 'better' now means better supported by the case record, not closer to the authors' framing; the internal/external ordering is Mao's explicit statement and must be attributed. PROVISIONAL: AI-assisted, unvalidated, awaiting human review."
+      "revision_note": "Revised 2026-11-05 after reading the reference texts: 'better' now means better supported by the case record, not closer to the authors' framing; the internal/external ordering is Mao's explicit statement and must be attributed. PROVISIONAL: AI-assisted, unvalidated, awaiting human review. Revised again: the learner's 'rival interest' explanation is a hypothesis unless the record establishes it; the internal/external-cause passage is in Mao's Section I, not Section II.",
+      "defensible_assessment": "This answer distinguishes some observations from hypotheses and proposes relevant investigation. Its explanation of the competing interests remains to be established."
     },
     {
       "id": "C2a",
@@ -415,7 +431,7 @@
         "note": "Expected behaviours that mention what authors say are valid only once the owner has confirmed (or marked not_addressed) every anchor concept: run `python tools/dm_eval.py readiness`."
       },
       "first_diagnostic": true,
-      "revision_note": "Revised 2026-11-05 after reading the reference texts: the earlier version assumed 'disagreement is not contradiction', which the reviewed sources do not establish (one passage says differences in concepts reflect objective contradictions). PROVISIONAL: AI-assisted, unvalidated, awaiting human review."
+      "revision_note": "Revised 2026-11-05 after reading the reference texts: the earlier version assumed 'disagreement is not contradiction', which the reviewed sources do not establish (one passage says differences in concepts reflect objective contradictions). PROVISIONAL: AI-assisted, unvalidated, awaiting human review. Revised again: an unsupported rulebook 'inconsistency' was removed from the scenario (the two rules do not conflict unless further conditions hold), and the scenario now says the records' contents are not supplied."
     },
     {
       "id": "C3b",
@@ -431,7 +447,7 @@
       "tutor_should": [
         {
           "id": "C3b.s1",
-          "text": "Recognise the restraint as defensible and ask which record (sign-up sheets, budget) would decide between the readings.",
+          "text": "Recognise the restraint as defensible and ask what record the group could consult (for example sign-up sheets or the budget, whose contents are not supplied here) that would decide between the readings.",
           "check": "human"
         },
         {
@@ -517,7 +533,7 @@
       "pair": "P3",
       "kind": "logical_inconsistency_mislabelled",
       "label": "INVENTED EXAMPLE (written by the app's developer for testing; not from any source, author or real event)",
-      "scenario_ref": "S2",
+      "scenario_ref": "S2b",
       "learner_input": "The rulebook contradicts itself, so the tool library is full of dialectical contradictions.",
       "anchors": [
         "contradiction_and_lookalikes"
@@ -532,6 +548,11 @@
           "id": "C3d.s2",
           "text": "If the library does not address formal inconsistency versus contradiction, say so.",
           "check": "mechanical:M_LIMITS"
+        },
+        {
+          "id": "C3d.s3",
+          "text": "Notice that the two rules conflict only under the added conditions stated (for the two volunteers scheduled for 19 hours), not in general.",
+          "check": "human"
         }
       ],
       "tutor_should_not": [
@@ -817,5 +838,6 @@
     }
   ],
   "_review_note": "Drafted by an AI model as a starting point. Every case, and every expected behaviour, needs the OWNER's review and edits (owner_review: pending). The pairing of 'better' and 'worse' reflects the drafter's judgement and may be wrong.",
-  "_first_diagnostic_note": "The first live diagnostic is only C2a (impressive terminology without explaining the situation), C1b (plain-language relational and developmental analysis) and C3a (a contradiction claimed that the evidence does not yet justify). See docs/dialectical/DIAGNOSTIC_PACKET.md."
+  "_first_diagnostic_note": "The first live diagnostic is only C2a (impressive terminology without explaining the situation), C1b (plain-language relational and developmental analysis) and C3a (a contradiction claimed that the evidence does not yet justify). See docs/dialectical/DIAGNOSTIC_PACKET.md.",
+  "_scope_note": "These cases are a small, provisional set of diagnostics. They are NOT an exhaustive or authoritative definition of dialectical reasoning, and passing them would not show it."
 }

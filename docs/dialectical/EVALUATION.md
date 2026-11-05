@@ -17,6 +17,8 @@ The rubric is an **app-created learning aid, not a canonical standard**; qualita
 ## First live run: a small three-case diagnostic (not the full set)
 Only **C2a** (terminology without explanation), **C1b** (plain-language relational/developmental analysis) and **C3a** (contradiction claimed, not yet justified) — see `DIAGNOSTIC_PACKET.md`. Worst case with defaults is ~12 requests (3 turns × (1 answer + 1 repair) × (1 + 1 retry)); a request count, not a dollar figure. The full 13-case set is a later step. **A live run needs separate spending authorization and has not happened.** At best it shows whether, on these three cases, the tutor asks for evidence and avoids rewarding jargon; it would not show the tutor understands dialectical materialism.
 
+The set is a small, provisional collection of diagnostics. It is **not** an exhaustive or authoritative definition of dialectical reasoning, and passing it would not show it.
+
 ## Success / failure criteria
 Each case lists `tutor_should` and `tutor_should_not`, each tagged:
 - `mechanical:M_*` — a surface check in `tools/dm_eval.py check` (thesis/antithesis wording absent from the passages; terminology praise;

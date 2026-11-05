@@ -374,3 +374,19 @@ def test_c1b_and_c2a_no_longer_encode_unsupported_premises_and_checks_do_not_fla
     flags = dm.check_output(good, [])
     assert {f["check"] for f in flags} == {"M_TAS"} and all(f["review"] for f in flags)
     assert "M_INEV" in kinds(blk("So it will inevitably transcend itself."))                       # an unquoted endorsement is still flagged
+
+
+def test_bounded_corrections_scenario_hypothesis_and_scope():
+    """Source-reading corrections; provisional, not validation."""
+    s2 = CASES["scenarios"]["S2"]["text"].lower()
+    assert "rulebook" not in s2 and "not supplied" in s2                                # no assumed inconsistency; records' contents not supplied
+    s2b = CASES["scenarios"]["S2b"]["text"].lower()
+    assert "conflict only under these added conditions" in s2b and "19 hours" in s2b
+    by = {c["id"]: c for c in CASES["cases"]}
+    assert by["C3d"]["scenario_ref"] == "S2b" and by["C3a"]["scenario_ref"] == "S2"
+    assert "hypothesis" in " ".join(x["text"] for x in by["C1b"]["tutor_should"]).lower()
+    assert "remains to be established" in by["C1b"]["defensible_assessment"]
+    assert any("not necessarily in every turn" in x["text"] for x in by["C1b"]["tutor_should"])
+    assert "exhaustive or authoritative definition" in CASES["_scope_note"]
+    for doc in ("DIAGNOSTIC_PACKET.md", "EVALUATION.md"):
+        assert "exhaustive or authoritative definition" in " ".join((ROOT / "docs" / "dialectical" / doc).read_text().split())

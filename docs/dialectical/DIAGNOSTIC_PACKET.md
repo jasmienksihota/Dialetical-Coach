@@ -11,6 +11,8 @@ A **populated reference-text version exists locally** at `docs/dialectical/local
 | C1b | plain-language answer on relationships and change | concrete_conditions, relations_interdependence, change_development_history, evidence_for_opposed_aspects | PENDING (local probe) | none proposed | no |
 | C3a | contradiction claimed that the evidence does not yet justify | contradiction_and_lookalikes, evidence_for_opposed_aspects | PENDING (local probe) | none proposed | no |
 
+**Scope:** these three cases are a small, provisional set of diagnostics, not an exhaustive or authoritative definition of dialectical reasoning.
+
 Five concepts in total (not nine): concrete_conditions, relations_interdependence, change_development_history, evidence_for_opposed_aspects, contradiction_and_lookalikes.
 
 ## C2a — terminology without explanation (scenario S1, ferry co-operative)
@@ -22,6 +24,7 @@ Five concepts in total (not nine): concrete_conditions, relations_interdependenc
 - **Observable tutor behaviours (REVISED, provisional):** *should* say plainly the response names no case fact and ask what facts it rests on and what shows the relationships it claims; make clear the objection is the missing evidence, not the vocabulary (the reviewed authors treat the unity of opposites as central); question "inevitably"; say the supplied passages do not establish a three-step sequence as a required method, without claiming the authors reject it (M_LIMITS). *Should not* praise terminology (M_PRAISE), treat the vocabulary as illegitimate, adopt a thesis-antithesis-synthesis sequence as required, or endorse "inevitably" (M_TAS and M_INEV only flag wording for a human to judge).
 
 ## C1b — plain language, relationships and change (scenario S1)
+*Provisional assessment:* this answer distinguishes some observations from hypotheses and proposes relevant investigation; its explanation of the competing interests (that the Sunday run created a rival interest) is a hypothesis that remains to be established. Over a dialogue, not in every turn, the exercise should examine how an external cause acts through internal conditions; relational language alone is not the lesson.
 *Invented learner response:* separates what the records show from inference; traces the bridge → Sunday run → vendors' boats and divided interests; says it does not yet know whether the split is about routes or pay shares; keeps "the bridge alone" alive.
 - **Proposed reading of the invented case (provisional):** relations and change are evidenced from named records; an opposition of interests is plausible but unproven until the pay-share formula and minutes are checked.
 - **Supporting source passages:** PENDING (local probe).
