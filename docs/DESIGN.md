@@ -1,66 +1,57 @@
-# Visual design: "a personal annotated notebook"
+# Visual design: Sugar Doodle direction
 
-**The direction is inferred, not verified.** It comes from a separate session's description of saved Pinterest pins (handmade, warm, playful; tomato red, leaf green, blush, cream, stars). It is not a confirmed preference spec and may not match what the owner wants. The pass is visual only and easy to revert (`git revert` the design commits; no behaviour, data or backend was touched).
+**Provenance.** The primary reference is the "Sugar Doodle Examples" design artifact (a shop landing page plus its Sugar Doodle token set). I read its source and tokens; I did **not** see it rendered. The earlier handmade/Pinterest direction was itself inferred, not a verified preference. Nothing here claims to match Jasmien's taste: it is a reversible visual pass, and the app is still in demo mode.
+
+## What was taken from the reference, and what was not
+Taken: cream paper page (#FBF4E6) with paper-white surfaces, warm ink (#3B2F2A) used for text *and* 2px outlines, pill buttons and nav chips, 24px card radius, solid "sticker" offset shadow on primary buttons, pastel fills (peony, blush, butter, lilac, sky, matcha), the four-point sparkle motif, marker-highlight under headings, Fredoka (headings) / Nunito (body) / Caveat (short empty-state notes only).
+Deliberately **not** taken: shop/cart/newsletter/product UI, tilted cards, twinkle animation, scalloped dividers, remote Google Fonts. Sticker shadows are limited to primary/approve buttons, the active session and the exercise panel, never behind long text. Fonts are bundled locally in `app/static/fonts/` (SIL OFL licence included); the app makes no remote font requests.
 
 ## Where to change things
-- **Colours, fonts, radii:** the single marked token block at the top of `app/static/style.css` (light `:root`, dark inside `@media (prefers-color-scheme: dark)`).
-- **Star:** one file, `app/static/star.svg`, drawn by the `.star` class via CSS mask, so it takes the `--star` colour. Used in the brand, and in empty states. Replace the file or remove `<span class="star">` elements to change/drop it.
-- **Headings:** serif stack (`--font-head`: Iowan Old Style / Palatino / Georgia, system fonts only). Body: system sans (`--font-body`). No remote fonts or assets; no handwriting fonts for text or controls.
-- Wavy blush underline on top-level headings is the only "pencil" detail; no animation (reduced-motion honoured), no texture behind text.
-- Passages, answers and hits are capped at `--measure: 68ch`.
+- **Tokens (colours, fonts, radii, shadows):** the marked block at the top of `app/static/style.css` (light `:root`; dark in `@media (prefers-color-scheme: dark)`).
+- **Sparkle:** `app/static/star.svg` (theme-aware inside the file), used via the `.star` class in the brand and empty states.
+- **Contrast:** `python scripts/check_contrast.py [--markdown]` recomputes the table below.
 
-## Tokens (light / dark)
-| Token | Light | Dark |
-|---|---|---|
-| bg (paper) | #FAF6ED | #1C1A16 |
-| panel (reading surface) | #FFFCF6 | #26231D |
-| ink / muted | #292821 / #5C574A | #F1EADB / #BDB5A2 |
-| accent (tomato, text-safe) | #B83A2E | #F0897D |
-| star (decorative tomato) | #C53E32 | #F0897D |
-| leaf | #456349 | #9CC4A0 |
-| blush / blush-ink | #F0DCD8 / #5E1F19 | #4A2D2A / #F6DDD9 |
+## Layout changes in this pass (CSS plus two tiny markup edits)
+- Conversation: bubbles with outlines, user messages blush, answer blocks keep their coloured left bars and labels; passages/answers capped at 68ch.
+- Passage inspection: on screens ≥1100px the passage dialog is a right-hand drawer (conversation stays visible); on narrow screens it is a centred dialog. Same focus trap, Escape, focus restore and accessible name as before.
+- New session: the two form sections are numbered (1 Source scope, 2 Tutor) with the same controls; nothing removed.
+- Library/history: same outlined cards, pastel badges and pills.
+- **Not delivered:** a persistent in-page source panel, library search/filter, or any new workflow.
 
-The suggested tomato #C53E32 is kept for the star only; the text/button tomato was darkened to #B83A2E so primary-button text and links pass comfortably. Dark mode was kept and re-derived in the same warm family.
-
-## Measured contrast (WCAG 2.x, computed by `scripts/check_contrast.py`; re-run it after any palette change)
+## Measured contrast (WCAG 2.x; light / dark)
 | Pairing | Target | Light | Dark |
 |---|---|---|---|
-| Body text on page (`ink` on `bg`) | 4.5:1 | 13.71 | 14.50 |
-| Body text on reading surface (`ink` on `panel`) | 4.5:1 | 14.44 | 13.08 |
-| Muted text on page (`muted` on `bg`) | 4.5:1 | 6.67 | 8.52 |
-| Muted text on reading surface (`muted` on `panel`) | 4.5:1 | 7.03 | 7.68 |
-| Primary button text on tomato (`accent-ink` on `accent`) | 4.5:1 | 5.70 | 7.32 |
-| Approve button text on leaf (`leaf-ink` on `leaf`) | 4.5:1 | 6.70 | 8.42 |
-| Link / cite chip tomato on surface (`accent` on `panel`) | 4.5:1 | 5.57 | 6.40 |
-| Link tomato on page (`accent` on `bg`) | 4.5:1 | 5.29 | 7.10 |
-| Text on blush (user message, selected, passage) (`blush-ink` on `blush`) | 4.5:1 | 9.45 | 9.57 |
-| Body text on blush (nav hover) (`ink` on `blush`) | 4.5:1 | 11.22 | 10.31 |
-| Warning notice (`warn-ink` on `warn-bg`) | 4.5:1 | 8.13 | 9.17 |
-| Error / withheld notice (`bad-ink` on `bad-bg`) | 4.5:1 | 7.43 | 8.13 |
-| OK notice / live chip (`ok-ink` on `ok-bg`) | 4.5:1 | 7.98 | 8.98 |
-| Label: quotation (`quote` on `panel`) | 4.5:1 | 6.71 | 6.40 |
-| Label: interpretation (`interp` on `panel`) | 4.5:1 | 6.90 | 7.73 |
-| Label: synthesis (`synth` on `panel`) | 4.5:1 | 6.51 | 8.44 |
-| Label: fiction (`fiction` on `panel`) | 4.5:1 | 6.08 | 8.50 |
-| Label: app coaching (`coach` on `panel`) | 4.5:1 | 7.84 | 8.74 |
-| Label: limits (`limits` on `panel`) | 4.5:1 | 7.40 | 7.59 |
-| Input / button boundary vs surface (UI 3:1) (`line-strong` on `panel`) | 3.0:1 | 4.09 | 4.21 |
-| Input boundary vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 3.89 | 4.67 |
-| Focus ring vs page (UI 3:1) (`focus` on `bg`) | 3.0:1 | 13.71 | 14.50 |
-| Focus ring vs surface (UI 3:1) (`focus` on `panel`) | 3.0:1 | 14.44 | 13.08 |
-| Tomato control boundary vs surface (UI 3:1) (`accent` on `panel`) | 3.0:1 | 5.57 | 6.40 |
-| Leaf accent on ok badge (UI 3:1) (`leaf` on `ok-bg`) | 3.0:1 | 5.41 | 6.95 |
+| Body text on page (`ink` on `bg`) | 4.5:1 | 11.80 | 14.22 |
+| Body text on reading surface (`ink` on `panel`) | 4.5:1 | 12.70 | 12.68 |
+| Muted text on page (`muted` on `bg`) | 4.5:1 | 5.98 | 8.88 |
+| Muted text on reading surface (`muted` on `panel`) | 4.5:1 | 6.44 | 7.91 |
+| Primary button text on peony (`btn-ink` on `btn`) | 4.5:1 | 6.60 | 6.60 |
+| Approve button text on matcha (`leaf-ink` on `leaf`) | 4.5:1 | 7.15 | 7.75 |
+| Olive text on page (`leaf-text` on `bg`) | 4.5:1 | 5.59 | 10.87 |
+| Passage highlight / step number text (`hl-ink` on `hl`) | 4.5:1 | 10.11 | 10.11 |
+| Ink on butter (warning, question, passage target) (`ink` on `butter`) | 4.5:1 | 10.11 | 7.32 |
+| Ink on sky (cite chip) (`ink` on `sky`) | 4.5:1 | 9.40 | 9.38 |
+| Ink on lilac (tag chip, cite hover) (`ink` on `lilac`) | 4.5:1 | 7.32 | 7.95 |
+| Link peony-deep on surface (`accent` on `panel`) | 4.5:1 | 5.10 | 7.40 |
+| Link peony-deep on page (`accent` on `bg`) | 4.5:1 | 4.74 | 8.30 |
+| Text on blush (user message, selected, passage) (`blush-ink` on `blush`) | 4.5:1 | 9.76 | 9.48 |
+| Body text on blush (nav hover) (`ink` on `blush`) | 4.5:1 | 9.76 | 10.29 |
+| Warning notice (`warn-ink` on `warn-bg`) | 4.5:1 | 10.11 | 8.25 |
+| Error / withheld notice (`bad-ink` on `bad-bg`) | 4.5:1 | 6.39 | 7.97 |
+| OK notice / live chip (`ok-ink` on `ok-bg`) | 4.5:1 | 7.76 | 8.75 |
+| Label: quotation (`quote` on `panel`) | 4.5:1 | 5.10 | 7.40 |
+| Label: interpretation (`interp` on `panel`) | 4.5:1 | 6.95 | 8.32 |
+| Label: synthesis (`synth` on `panel`) | 4.5:1 | 6.56 | 8.33 |
+| Label: fiction (`fiction` on `panel`) | 4.5:1 | 6.12 | 8.11 |
+| Label: app coaching (`coach` on `panel`) | 4.5:1 | 6.44 | 7.91 |
+| Label: limits (`limits` on `panel`) | 4.5:1 | 7.46 | 7.24 |
+| Input / button boundary vs surface (UI 3:1) (`line-strong` on `panel`) | 3.0:1 | 12.70 | 9.25 |
+| Input boundary vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 11.80 | 10.38 |
+| Focus ring vs page (UI 3:1) (`focus` on `bg`) | 3.0:1 | 11.80 | 14.22 |
+| Focus ring vs surface (UI 3:1) (`focus` on `panel`) | 3.0:1 | 12.70 | 12.68 |
+| Outline vs page (UI 3:1) (`line-strong` on `bg`) | 3.0:1 | 11.80 | 10.38 |
 
-All pairs meet their target. Focus ring: 3px solid `--focus` with a 2px offset, so it is drawn against the page/surface (rows above), not against a button fill.
-
-## What this pass is (and is not)
-A **visual reskin** plus small fixes. Delivered: tokens, star, typography, restyled existing screens, wrapping of long titles/tokens, a modal accessibility fix (below) and a scope-preview bug fix (a stray "null" line: native \`replaceChildren()\` stringifies nullish children; all calls now go through a \`put()\` helper that drops them).
-**Not delivered** (earlier workspace-redesign ideas; no structural change was made): a persistent source side panel, a simplified session-start flow, a searchable/filterable library, any new workflow. These remain open.
-
-Modal (passage/document view): focus moves into the dialog on open, Tab/Shift+Tab stay inside it, Escape closes, focus returns to the control that opened it, and it has \`role="dialog" aria-modal="true"\` with its heading as the accessible name. Covered by \`tests/e2e/test_dialog_and_scope.py\`.
+Only the listed pairs are measured; this does not establish full accessibility, and there was no screen-reader testing. Peony (#E8A8B8) buttons are identified by their 2px ink outline plus text, not by fill contrast. Dark mode is re-derived (dark brown paper, cream ink).
 
 ## Verification
-- `python scripts/make_screenshots.py` drives the real app (demo provider, synthetic fixtures approved, temp data dir) at 1280px and 390px, deviceScaleFactor 2, and asserts no horizontal scroll. Output: `docs/design/screenshots/` (1-conversation, 1b-passage-panel, 2-library, 3-new-session, 4-session-history, focus-*).
-- Dark-mode shots (`*-dark-*`) and a long-title / long-unbroken-token stress case (`5-long-title-passage-view-dark-narrow.png`) were also captured and inspected; no horizontal scroll at either width in light or dark.
-- Contrast figures cover only the listed pairs; they do not establish full accessibility. No screen-reader testing was done.
-- Not verified: other browsers/OS (the heading font falls back by platform); real-document content; the owner's taste.
+`python scripts/make_screenshots.py` drives the real app (demo provider, SYNTHETIC fixtures approved, temp data dir) at 1280px and 390px, deviceScaleFactor 2, light and dark, and asserts no horizontal scroll. Output in `docs/design/screenshots/`. Not verified: other browsers/OSes, real documents, the owner's taste, live tutoring.

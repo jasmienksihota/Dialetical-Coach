@@ -21,7 +21,11 @@ while not srv.started: time.sleep(.05)
 URL = f"http://127.0.0.1:{port}"
 chrome = sorted(glob.glob("/opt/pw-browsers/chromium-*/chrome-linux64/chrome"))[-1]
 
-def scrolls(pg): return pg.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth")
+def scrolls(pg):
+    r = pg.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth")
+    if r:
+        print(pg.evaluate("""()=>{const W=document.documentElement.clientWidth;return [...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>W+1).slice(0,6).map(e=>e.tagName+'.'+e.className+' '+Math.round(e.getBoundingClientRect().right))}"""))
+    return r
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=chrome, args=["--no-sandbox"])

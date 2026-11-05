@@ -28,10 +28,15 @@ def ratio(a, b):
 PAIRS = [
     ("Body text on page", "ink", "bg", 4.5), ("Body text on reading surface", "ink", "panel", 4.5),
     ("Muted text on page", "muted", "bg", 4.5), ("Muted text on reading surface", "muted", "panel", 4.5),
-    ("Primary button text on tomato", "accent-ink", "accent", 4.5),
-    ("Approve button text on leaf", "leaf-ink", "leaf", 4.5),
-    ("Link / cite chip tomato on surface", "accent", "panel", 4.5),
-    ("Link tomato on page", "accent", "bg", 4.5),
+    ("Primary button text on peony", "btn-ink", "btn", 4.5),
+    ("Approve button text on matcha", "leaf-ink", "leaf", 4.5),
+    ("Olive text on page", "leaf-text", "bg", 4.5),
+    ("Passage highlight / step number text", "hl-ink", "hl", 4.5),
+    ("Ink on butter (warning, question, passage target)", "ink", "butter", 4.5),
+    ("Ink on sky (cite chip)", "ink", "sky", 4.5),
+    ("Ink on lilac (tag chip, cite hover)", "ink", "lilac", 4.5),
+    ("Link peony-deep on surface", "accent", "panel", 4.5),
+    ("Link peony-deep on page", "accent", "bg", 4.5),
     ("Text on blush (user message, selected, passage)", "blush-ink", "blush", 4.5),
     ("Body text on blush (nav hover)", "ink", "blush", 4.5),
     ("Warning notice", "warn-ink", "warn-bg", 4.5), ("Error / withheld notice", "bad-ink", "bad-bg", 4.5),
@@ -42,8 +47,7 @@ PAIRS = [
     ("Input / button boundary vs surface (UI 3:1)", "line-strong", "panel", 3.0),
     ("Input boundary vs page (UI 3:1)", "line-strong", "bg", 3.0),
     ("Focus ring vs page (UI 3:1)", "focus", "bg", 3.0), ("Focus ring vs surface (UI 3:1)", "focus", "panel", 3.0),
-    ("Tomato control boundary vs surface (UI 3:1)", "accent", "panel", 3.0),
-    ("Leaf accent on ok badge (UI 3:1)", "leaf", "ok-bg", 3.0),
+    ("Outline vs page (UI 3:1)", "line-strong", "bg", 3.0),
 ]
 
 def main():
