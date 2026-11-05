@@ -153,15 +153,15 @@ async function loadStatus() {
   const u = s.live_usage;
   const STAGE = {
     none: 'Live configured · API not yet reached',
-    api_reachable: 'Live: API reachable — structured output NOT yet seen',
-    structured_output: 'Live: structured output OK — citation-validated tutoring NOT yet seen',
-    tutoring_verified: u.last_tutoring_verified ? `Live: tutoring verified (citation-validated turn, ${u.last_tutoring_verified.slice(0, 10)})` : 'Live: tutoring verified',
+    api_reachable: 'Live: API reachable — structured output not yet seen',
+    structured_output: 'Live: structured output seen — citation checks not yet passed',
+    citation_checks_passed: u.last_citation_checks_passed ? `Live: citation checks passed (${u.last_citation_checks_passed.slice(0, 10)}; mechanical only)` : 'Live: citation checks passed (mechanical only)',
   };
   chip.textContent = !s.live_configured ? 'Demo mode only — live not configured'
     : `${STAGE[u.stage]} · ${u.requests_today}/${u.cap_per_day} requests today`;
   chip.title = `Model: ${s.model || 'not set'}. Tokens reported today: ${u.input_tokens_today} in / ${u.output_tokens_today} out. `
-    + 'An API success alone is not verified tutoring: that needs a reply that parses AND passes citation validation. '
-    + 'Even then, citations are checked mechanically, not for meaning. ' + u.note;
+    + '"Citation checks passed" means one reply parsed and every citation passed the app\'s mechanical checks (passage supplied, document approved and in scope, quotation present). '
+    + 'It does not measure tutoring quality or whether the passages support the claims. An API success alone does not count. ' + u.note;
   chip.className = 'chip ' + (s.live_configured ? 'live' : 'demo');
   $('#retrieval-note').textContent = `Retrieval: ${s.retrieval_mode}. ${s.retrieval_note}`;
   $('#up-tags').replaceChildren(...tagBoxes([], 'uptag'));

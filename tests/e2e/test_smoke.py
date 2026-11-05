@@ -208,3 +208,29 @@ def test_live_status_chip_does_not_overclaim(tmp_path, page):
         assert "API not yet reached" in text and "verified" not in text.lower()
     finally:
         srv.should_exit = True; t.join(timeout=5)
+
+
+def test_badge_after_a_passing_reply_says_citation_checks_passed_not_verified(tmp_path, page):
+    app = create_app(Settings(data_dir=tmp_path / "d", live_enabled=True, anthropic_api_key="x" * 12,
+                              anthropic_model="claude-sonnet-5-5"), lambda kind: (_ for _ in ()).throw(AssertionError("no live call allowed")))
+    g = app.state.guard                                   # simulate a recorded reply that passed the mechanical checks
+    cid = g.reserve("chat", "claude-sonnet-5-5", 100)
+    g.finish(cid, "ok")
+    g.mark(cid, structured=True, citations_ok=True)
+    s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+    srv = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning"))
+    t = threading.Thread(target=srv.run, daemon=True); t.start()
+    for _ in range(100):
+        if srv.started:
+            break
+        time.sleep(0.05)
+    try:
+        page.goto(f"http://127.0.0.1:{port}")
+        page.wait_for_function("document.querySelector('#status-chip').textContent.length > 0")
+        text = page.inner_text("#status-chip")
+        assert "citation checks passed" in text and "mechanical only" in text
+        assert "verified" not in text.lower()
+        tip = page.get_attribute("#status-chip", "title")
+        assert "does not measure tutoring quality" in tip and "verified" not in tip.lower()
+    finally:
+        srv.should_exit = True; t.join(timeout=5)

@@ -1,6 +1,8 @@
 # Real-document acceptance checklist
 
-**Purpose:** establish that the app works on YOUR documents before you rely on it. Automated tests use
+**Purpose:** establish that the app works on YOUR documents before you rely on it. Feature work (OCR, semantic
+search, anything new) is paused until you have results. Nothing in the project's synthetic tests tells us where
+failures in your collection are likely to be; treat any guess about that as a hypothesis to test with this list. Automated tests use
 only invented fixtures, so they cannot tell you this. No live API call or key is needed for any step
 (demo mode is enough). Do the steps in order; record results in the table at the end.
 
@@ -107,8 +109,8 @@ scripted placeholders — they exist to exercise the machinery, not to evaluate 
 | 6 | "Another example" exhaustion | any | | |
 
 **If something fails:** note the check number, the file type, and what you saw (e.g. "PDF p. 41 contains
-the running header", "phrase from p. 87 reported on p. 88"). Those observations decide the next
-milestone (OCR, column handling, semantic retrieval, …) — see `docs/BUILD_STATUS.md`.
+the running header", "phrase from p. 87 reported on p. 88"). Those observations — not our assumptions — decide
+what gets worked on next (see `docs/BUILD_STATUS.md`).
 
 **What passing does NOT show:** that live-model answers are well grounded (use
 `docs/LIVE_EVAL_CHECKLIST.md`, which needs your key and spend), that retrieval finds paraphrases, or

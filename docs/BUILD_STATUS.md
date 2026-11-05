@@ -19,7 +19,7 @@ follow-up query order, live-session acknowledgement, retry/sleep in adapter test
 |---|---|---|---|---|---|
 | 1 | Scope = doc ∪ tags is ambiguous | Yes (semantics undocumented in UI; no resolved list) | Behaviour **unchanged** (union is the safer, more useful reading). Added `explain_scope`, `POST /api/scope/resolve`, live preview in every scope picker, resolved list in each session header, `report.scope` recorded per turn, About text | `test_scope_transparency.py`, e2e smoke asserts preview + tag union | Scope can still be edited via API only for chats (no UI editor yet) |
 | 2 | Source claims could hide in coaching/fiction/limits blocks | Yes (3/3 smuggled blocks passed as `uncited`) | Pattern guard → `uncited_source_claim` / `uncited_quotation`; fiction may not cite; prompt contract strengthened; UI labels "no sources cited" | `test_citation_bypass.py` (12 smuggled, 8 benign, copied-text, end-to-end repair/withhold, exercise question) | **Heuristic.** Paraphrase avoiding assertion verbs is not detected (asserted as a known-limitation test). May withhold harmless blocks, e.g. "your text states…". Mechanical validation still does not prove semantic support |
-| 3 | HTTP success shown as "verified" | Yes (`verified` = any ok row) | Three stages stored/reported separately; badge says which stage; `--ping` verifies connectivity+structure only | `test_live_stages.py` (empty/garbage/fake-citation/uncited replies never reach "tutoring verified"; migration of old DBs) | "Tutoring verified" = one citation-validated turn, not a quality guarantee; unproven against a real model |
+| 3 | HTTP success was labelled "verified" | Yes (any successful HTTP row counted) | Three stages stored/reported separately; the top stage is labelled **"citation checks passed"** (mechanical checks only); `--ping` establishes connectivity + structure only | `test_live_stages.py` (empty/garbage/fake-citation/uncited replies never reach that stage; migration of old DBs); `test_wording.py` | "Citation checks passed" says nothing about tutoring quality or whether passages support claims; unproven against a real model |
 | 4 | Follow-ups ("How does that change?", "Give another example", "Why is that the principal one?") | Yes: chain drift (anchor was previous follow-up), nothing carried when prior turn cited nothing, "another example" re-ran a 3-word weak search | `followup.py`: anchor = last substantive question; carry cited-else-supplied passages; "another/different" excludes prior passages and says so when exhausted; query shown in UI | `test_followups.py` (scope never widened, unapproved docs dropped, exhaustion message) | Heuristic classifier; lexical only; a follow-up whose referent isn't in the last question can still retrieve poorly |
 | 5 | Real-document checklist + PDF stress tests outstanding | — | `docs/REAL_DOCUMENT_ACCEPTANCE.md`, `tools/inspect_import.py`, `tests/stress_fixtures.py`, `tests/test_extraction_stress.py` | 32 stress tests (FTS5 and fallback) | **Owner has not yet run the checklist on real documents** |
 
@@ -43,16 +43,28 @@ Observed and **not fixed (documented limits):** sentences straddling a page brea
 Exists: opt-in flag + per-session acknowledgement; daily request cap persisted in SQLite (retries and repairs count); output-token cap (ceiling 4096); prompt-size guard; bounded retries; token-usage logging (counts, no content). Does **not** exist: any dollar cap, balance awareness, or cost estimate; input tokens are only roughly bounded by characters; timed-out requests may still be billed. Set a billing limit with the provider.
 
 ## NOT verified
-- **Live model behaviour** — no key, no request. `claude-sonnet-5-5` is configured in `.env.example` but its availability is **unverified** until `python -m app.check --ping` succeeds, and "tutoring verified" needs a validated citation turn.
+- **Live model behaviour** — no key, no request. `claude-sonnet-5-5` is configured in `.env.example` but its availability is **unverified** until `python -m app.check --ping` succeeds, and "citation checks passed" needs a reply whose citations pass the mechanical checks (which still does not measure tutoring quality).
 - **Any real document**, real-corpus retrieval quality, real PDF column order/footnotes.
 - macOS/Windows commands, Safari/Firefox.
 - Semantic support of citations (by design), real-model resistance to injected instructions, answer leakage in free-text feedback.
 
-## Recommended next milestone (from what was actually observed)
-1. **Owner action, no code:** run `docs/REAL_DOCUMENT_ACCEPTANCE.md` on 3–4 real files and report pass/fail numbers. Every defect found so far (7 of 7 real bugs, plus the multi-turn summary gap) was in **import/extraction or context handling**, none in the retrieval ranking or the UI — so real-document extraction is where the next failures will most likely appear, and guessing features before seeing them would be wasteful.
-2. **Then fix what that run shows**, in this order of evidence: if page probes or column order fail → layout-aware extraction and cross-page overlap; if headers/footers or encodings misbehave → tune the cleanup heuristics; if many scanned pages → OCR (not before).
-3. **Semantic/hybrid retrieval only if** checklist §4/§6 shows real vocabulary-mismatch misses. The synthetic probe showed misses are already surfaced as weak/none, which is the safe failure mode; it does not yet justify new infrastructure.
-4. **Live evaluation** (`docs/LIVE_EVAL_CHECKLIST.md`) once you add a key and choose a spend limit: use it to measure how often the uncited-claim guard withholds harmless blocks and whether real answers stay grounded. Do this before OCR or semantic search because it tests the one component that has never run for real.
+## Current phase: feature pause
+OCR, semantic/hybrid retrieval and all other feature additions are **paused** while the owner runs the
+real-document checks. Only fixes for defects those checks reveal should be made.
+
+## Next step (a working hypothesis, not a finding)
+1. **Owner action, no code:** run `docs/REAL_DOCUMENT_ACCEPTANCE.md` on 3–4 real files and report pass/fail numbers.
+2. **Working hypothesis:** extraction/import quality may turn out to be the weakest area. The only basis for this is
+   that the bugs found so far surfaced in import and context handling — but those came from **synthetic fixtures I wrote
+   myself**, which encode my own assumptions about what documents look like. They do **not** show where failures in
+   the owner's real collection will occur, and the tally was not exclusively extraction (it also included a
+   fallback-retriever tokenization bug, and earlier browser testing found three UI bugs). Real documents may fail in
+   entirely different ways (or not at all).
+3. **Let the checklist results set priorities.** Candidate follow-ups, each justified only if a specific check fails:
+   layout-aware extraction / cross-page overlap (page or column failures), cleanup heuristic tuning (headers, footers,
+   encodings), OCR (many scanned pages), semantic retrieval (real vocabulary-mismatch misses). None is scheduled.
+4. **Live evaluation** (`docs/LIVE_EVAL_CHECKLIST.md`) is the other large unknown: the guard, the adapter and real-model
+   grounding have never run against a real model. It needs the owner's key, a provider-side spend limit and explicit go-ahead.
 
 ## Remaining
 Scope editing UI for existing chats; streaming; exercise history view; the items above.

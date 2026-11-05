@@ -86,8 +86,8 @@ These are brakes on accidents, **not a dollar cap**: cost depends on the model's
 billed (including input tokens, which this app only roughly bounds), a request that times out client-side may still
 be billed, and the app cannot see your balance. The only real ceiling is a billing/spend limit you set with
 your provider. The status badge reports three separate facts — API reachable, usable structured output, and a
-citation-validated tutoring turn — and only the last may be called verified tutoring (even that checks
-citations mechanically, not meaning).
+reply whose citations passed the mechanical checks ("citation checks passed"). That label is not a measure of
+tutoring quality: it checks that citations were supplied, in scope and quoted accurately, not that they support the claim.
 
 ## Choosing sources: documents + tags
 Checked documents and checked tags combine as a **union**; the app lists the exact resolved documents (and why each

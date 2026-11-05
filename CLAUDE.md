@@ -15,6 +15,11 @@ Core loop: import docs -> approve -> ask / start an exercise -> retrieve passage
 from the selected approved docs -> structured answer with inspectable, mechanically
 validated citations -> continue the conversation -> save, revisit, export.
 
+## Current phase
+**Feature work is paused.** No OCR, semantic retrieval or other new features while the owner runs the real-document checks
+(`docs/REAL_DOCUMENT_ACCEPTANCE.md`). Fix defects those checks reveal; otherwise leave scope alone. Wording rule:
+never describe mechanical checks as verifying tutoring quality; the UI label is "citation checks passed".
+
 ## Hard requirements (do not regress)
 
 1. **Approval gate.** New imports are unapproved. Only approved documents are ever

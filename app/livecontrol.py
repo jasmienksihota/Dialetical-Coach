@@ -70,7 +70,7 @@ class LiveGuard:
                  call_id, status, inp, out, error)
 
     def mark(self, call_id, *, structured=None, citations_ok=None):
-        """Record what happened AFTER the HTTP call: usable structure, citation-validated turn."""
+        """Record what happened AFTER the HTTP call: usable structure, and whether the turn's citations passed the mechanical checks."""
         if call_id is None:
             return
         with self.db.tx() as c:
@@ -91,14 +91,15 @@ class LiveGuard:
             api_ts, struct_ts, cite_ts = last("status='ok'"), last("status='ok' AND structured=1"), \
                 last("status='ok' AND citations_ok=1")
             total = c.execute("SELECT COUNT(*) FROM live_calls").fetchone()[0]
-        stage = ("tutoring_verified" if cite_ts else "structured_output" if struct_ts
+        stage = ("citation_checks_passed" if cite_ts else "structured_output" if struct_ts
                  else "api_reachable" if api_ts else "none")
         return {"requests_today": today["n"], "cap_per_day": self.settings.live_max_requests_per_day,
                 "input_tokens_today": today["i"], "output_tokens_today": today["o"],
                 "total_requests_ever": total,
-                # three separate facts; only the last one may be called "verified tutoring"
+                # three separate facts. The last is "citation checks passed": mechanical checks only,
+                # NOT a measure of tutoring quality or of whether passages support the claims
                 "api_reachable": bool(api_ts), "structured_output": bool(struct_ts),
-                "tutoring_verified": bool(cite_ts), "stage": stage,
-                "last_api_success": api_ts, "last_structured": struct_ts, "last_tutoring_verified": cite_ts,
+                "citation_checks_passed": bool(cite_ts), "stage": stage,
+                "last_api_success": api_ts, "last_structured": struct_ts, "last_citation_checks_passed": cite_ts,
                 "note": ("Counts are requests this app sent and tokens the API reported. This is not a "
                          "dollar cap; set billing limits with your provider.")}

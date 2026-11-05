@@ -29,7 +29,7 @@ def report(s: Settings, guard: LiveGuard, db: Database) -> list[str]:
         f"live configured:        {'yes' if s.live_configured else 'no'}",
         f"API reachable:          {'yes (last ' + u['last_api_success'] + ')' if u['api_reachable'] else 'NO - no successful live HTTP request recorded yet'}",
         f"structured output:      {'yes (last ' + u['last_structured'] + ')' if u['structured_output'] else 'NO - no usable structured reply seen yet'}",
-        f"tutoring verified:      {'yes (last ' + u['last_tutoring_verified'] + ')' if u['tutoring_verified'] else 'NO - no citation-validated tutoring turn yet'}",
+        f"citation checks passed: {'yes (last ' + u['last_citation_checks_passed'] + ')' if u['citation_checks_passed'] else 'NO - no reply has passed the mechanical citation checks yet'}",
         f"max requests / UTC day: {s.live_max_requests_per_day}  (used today: {u['requests_today']})",
         f"max output tokens/req:  {s.anthropic_max_tokens}  (hard ceiling 4096)",
         f"max retries:            {s.live_max_retries}  (each retry counts as a request)",
@@ -81,8 +81,9 @@ def main(argv=None) -> int:
     print("\nAPI request succeeded (key and model ID were accepted)."
           + (" The reply was valid structured output." if structured else " BUT the reply was NOT usable structured output."))
     print(f"Reply (truncated): {str(out)[:160]}")
-    print("This does NOT verify tutoring: ask a real question about approved documents in the app; only a "
-          "turn whose citations pass validation counts.")
+    print("This says nothing about tutoring quality. Ask a real question about approved documents in the app; "
+          "only a reply whose citations pass the mechanical checks counts as 'citation checks passed' "
+          "(and even that does not show a passage supports a claim).")
     return 0
 
 

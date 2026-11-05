@@ -88,7 +88,7 @@ def generate_validated(svc: Services, provider: Provider, req: GenRequest,
             blocks = post(blocks)
         with svc.db.tx() as c:
             report = validate_blocks(c, blocks, allowed, scope_doc_ids, texts)
-        if guard:   # "tutoring verified" needs a citation-validated turn, not just an HTTP success
+        if guard:   # "citation checks passed" needs a reply that parses AND validates, not just an HTTP success
             verified = any(b["status"] == "verified" for b in report["blocks"])
             guard.mark(call_id, citations_ok=bool(report["ok"] and verified))
         return raw, blocks, report

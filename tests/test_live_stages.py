@@ -66,7 +66,7 @@ class Smart(FakeClient):
 def test_fresh_install_reports_no_stage(tmp_path):
     e = live_env(tmp_path, Smart("good"))
     u = usage(e)
-    assert (u["api_reachable"], u["structured_output"], u["tutoring_verified"], u["stage"]) == (False, False, False, "none")
+    assert (u["api_reachable"], u["structured_output"], u["citation_checks_passed"], u["stage"]) == (False, False, False, "none")
 
 
 @pytest.mark.parametrize("mode,stage,structured", [
@@ -75,7 +75,7 @@ def test_fresh_install_reports_no_stage(tmp_path):
     ("fake_citation", "structured_output", True),  # usable blocks, citations fail validation
     ("uncited_only", "structured_output", True),   # usable, but nothing source-backed to validate
 ])
-def test_http_success_alone_is_never_called_verified_tutoring(tmp_path, mode, stage, structured):
+def test_http_success_alone_never_counts_as_citation_checks_passed(tmp_path, mode, stage, structured):
     client = Smart(mode)
     e = live_env(tmp_path, client)
     cid = e.chat("live")
@@ -83,16 +83,16 @@ def test_http_success_alone_is_never_called_verified_tutoring(tmp_path, mode, st
     u = usage(e)
     assert u["api_reachable"] is True
     assert u["structured_output"] is structured
-    assert u["tutoring_verified"] is False and u["stage"] == stage and u["last_tutoring_verified"] is None
+    assert u["citation_checks_passed"] is False and u["stage"] == stage and u["last_citation_checks_passed"] is None
 
 
-def test_only_a_citation_validated_turn_verifies_tutoring(tmp_path):
+def test_only_a_reply_with_passing_citation_checks_sets_that_stage(tmp_path):
     e = live_env(tmp_path, Smart("good"))
     r = e.say(e.chat("live"), Q)
     assert r.status_code == 200 and r.json()["assistant_message"]["blocks"][0]["status"] == "verified"
     u = usage(e)
-    assert (u["api_reachable"], u["structured_output"], u["tutoring_verified"], u["stage"]) == (True, True, True, "tutoring_verified")
-    assert u["last_tutoring_verified"]
+    assert (u["api_reachable"], u["structured_output"], u["citation_checks_passed"], u["stage"]) == (True, True, True, "citation_checks_passed")
+    assert u["last_citation_checks_passed"]
 
 
 def test_a_failed_repair_then_good_reply_counts_once_validated(tmp_path):
@@ -102,10 +102,10 @@ def test_a_failed_repair_then_good_reply_counts_once_validated(tmp_path):
             return super().create(**kw)
     e = live_env(tmp_path, Flaky("good"))
     e.say(e.chat("live"), Q)
-    assert usage(e)["tutoring_verified"] is True and usage(e)["total_requests_ever"] == 2
+    assert usage(e)["citation_checks_passed"] is True and usage(e)["total_requests_ever"] == 2
 
 
-def test_ping_verifies_only_connectivity_and_structure(tmp_path, monkeypatch, capsys):
+def test_ping_establishes_only_connectivity_and_structure(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("TUTOR_DATA_DIR", str(tmp_path / "d"))
     for k, v in (("ANTHROPIC_API_KEY", SECRET), ("ANTHROPIC_MODEL", "claude-sonnet-5-5"), ("TUTOR_LIVE_ENABLED", "1")):
         monkeypatch.setenv(k, v)
@@ -115,10 +115,10 @@ def test_ping_verifies_only_connectivity_and_structure(tmp_path, monkeypatch, ca
     assert check_mod.main(["--ping", "--yes"]) == 0
     out = capsys.readouterr().out
     assert "API request succeeded" in out and "valid structured output" in out
-    assert "does NOT verify tutoring" in out and SECRET not in out
+    assert "nothing about tutoring quality" in out and "citation checks passed" in out and SECRET not in out
     s = Settings.from_env()
     u = LiveGuard(Database(s.db_path), s).summary()
-    assert (u["api_reachable"], u["structured_output"], u["tutoring_verified"]) == (True, True, False)
+    assert (u["api_reachable"], u["structured_output"], u["citation_checks_passed"]) == (True, True, False)
 
 
 def test_old_databases_are_migrated_without_losing_rows(tmp_path):
@@ -134,4 +134,4 @@ def test_old_databases_are_migrated_without_losing_rows(tmp_path):
         cols = {r["name"] for r in c.execute("PRAGMA table_info(live_calls)")}
     assert {"structured", "citations_ok"} <= cols
     u = LiveGuard(db, Settings(data_dir=tmp_path)).summary()
-    assert u["api_reachable"] is True and u["tutoring_verified"] is False        # a legacy ok row proves HTTP only
+    assert u["api_reachable"] is True and u["citation_checks_passed"] is False        # a legacy ok row proves HTTP only

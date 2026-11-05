@@ -50,6 +50,6 @@ return it from `get_retriever`.
 - **Uncited-claim guard** (`citations.detect_uncited_source_claim`): pattern checks for source claims in
   coaching/fiction/limits blocks; fiction may not cite. Heuristic, not proof of anything.
 - **Live stages** (`livecontrol.LiveGuard`): `live_calls.status/structured/citations_ok` keep "API reachable",
-  "usable structured output" and "citation-validated tutoring turn" separate.
+  "usable structured output" and "citation checks passed" (mechanical only) separate.
 - **Follow-ups** (`followup.py`): short messages are expanded with the last *substantive* question; "another/different"
   excludes passages already used; everything stays inside `resolve_scope`.
