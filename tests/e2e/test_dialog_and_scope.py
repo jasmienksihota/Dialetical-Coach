@@ -93,3 +93,30 @@ def test_modal_focus_trap_escape_restore_and_name(page, server):
     page.keyboard.press("Escape")
     assert page.locator("#modal").is_hidden()
     assert page.evaluate("document.activeElement.classList.contains('inspect-btn')")
+
+
+@pytest.mark.parametrize("size", [(1280, 900), (390, 844)])
+def test_citation_modal_drawer_is_truly_modal(page, server, size):
+    """Opened from a citation chip: background inert, focus trapped, focus returns to the chip. Desktop (drawer) and narrow."""
+    page.set_viewport_size({"width": size[0], "height": size[1]})
+    page.goto(server); page.wait_for_selector(".doc-card")
+    page.click("#nav button[data-view=sessions]")
+    page.click("#new-chat-btn"); page.wait_for_selector("#nc-start"); page.click("#nc-start")
+    page.wait_for_selector("#chat-input")
+    page.fill("#chat-input", "What is the main constraint on the workshop?"); page.click("#chat-send")
+    page.wait_for_selector(".cite-chip")
+    chip = page.locator(".cite-chip").first
+    chip.focus(); chip.press("Enter")
+    page.wait_for_selector("#modal .target")
+    assert page.evaluate("document.querySelector('main').inert && document.querySelector('header.top').inert")
+    assert page.evaluate("document.querySelector('#modal').contains(document.activeElement)")
+    for key in ["Tab"] * 30 + ["Shift+Tab"] * 30:
+        page.keyboard.press(key)
+        assert page.evaluate("document.querySelector('#modal').contains(document.activeElement)")
+    # inert background cannot receive focus even programmatically
+    page.evaluate("document.querySelector('#chat-input').focus()")
+    assert page.evaluate("document.querySelector('#modal').contains(document.activeElement)")
+    page.keyboard.press("Escape")
+    assert page.locator("#modal").is_hidden()
+    assert page.evaluate("!document.querySelector('main').inert && !document.querySelector('header.top').inert")
+    assert page.evaluate("document.activeElement.classList.contains('cite-chip')")

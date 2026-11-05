@@ -13,7 +13,7 @@ Deliberately **not** taken: shop/cart/newsletter/product UI, tilted cards, twink
 
 ## Layout changes in this pass (CSS plus two tiny markup edits)
 - Conversation: bubbles with outlines, user messages blush, answer blocks keep their coloured left bars and labels; passages/answers capped at 68ch.
-- Passage inspection: on screens ≥1100px the passage dialog is a right-hand drawer (conversation stays visible); on narrow screens it is a centred dialog. Same focus trap, Escape, focus restore and accessible name as before.
+- Passage inspection: on screens ≥1100px the passage dialog is a right-hand drawer (conversation stays visible); on narrow screens it is a centred dialog. It is a **modal** passage drawer, not a side-by-side interactive workspace: the page behind is `inert`, focus enters the drawer, stays inside, and returns to the opening control (e.g. the citation chip) on close.
 - New session: the two form sections are numbered (1 Source scope, 2 Tutor) with the same controls; nothing removed.
 - Library/history: same outlined cards, pastel badges and pills.
 - **Not delivered:** a persistent in-page source panel, library search/filter, or any new workflow.

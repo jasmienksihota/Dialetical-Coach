@@ -85,9 +85,12 @@ const modal = $('#modal');
 function put(el, ...nodes) { el.replaceChildren(...nodes.filter(n => n !== null && n !== undefined && n !== false)); }
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
 let modalReturnFocus = null;
+// While the dialog is open the page behind it is inert: not focusable, not clickable by keyboard, hidden from assistive tech.
+function setBackgroundInert(on) { for (const el of document.querySelectorAll('header.top, main')) el.inert = on; }
 function openModal(...nodes) {
   const b = $('#modal-body'); put(b, ...nodes);
   modalReturnFocus = document.activeElement;
+  setBackgroundInert(true);
   const dlg = modal.querySelector('[role=dialog]');
   const title = b.querySelector('h2');
   if (title) { title.id = 'modal-title'; dlg.setAttribute('aria-labelledby', 'modal-title'); dlg.removeAttribute('aria-label'); }
@@ -97,6 +100,7 @@ function openModal(...nodes) {
 }
 function closeModal() {
   modal.hidden = true;
+  setBackgroundInert(false);
   if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
   modalReturnFocus = null;
 }
